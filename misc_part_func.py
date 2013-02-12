@@ -7,6 +7,13 @@ K = 8  # largest part
 i = 0
 #print Partitions(Q,length=N,max_part=K).cardinality() # Sage is very slow at this
 
+Q = 4 # the total
+N = 2 # number of parts
+K = 2 # largest part
+
+i = 0
+#print Partitions(Q,length=N,max_part=K).cardinality() # Sage is very slow at this
+
 print Q,N,K,'\n'
 print 'i Q  N K  _sum'
 
@@ -16,13 +23,14 @@ def parts_nsx(i,Q,N,K):
         print 'found one, K=',K
         return 1
     if Q<=0 or N<=0 or K<=0:
-        print 'nothin'
+        print 'change i'
         return 0
     if Q>0 and N>0 and K>0:
         _sum = 0
         for i in range(0,N+1):
+            print 'K=',K,'decrease K'
             _sum += parts_nsx(i,Q-i*K, N-i, K-1)
-            print i,Q-i*K,N-i,K-1,_sum
+            
         return _sum
             
 print parts_nsx(i,Q,N,K)
