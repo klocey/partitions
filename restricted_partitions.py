@@ -10,9 +10,6 @@ import random, decimal
 
 """ Functions for integer partitioning. Most apply to partitions of N having S parts """
 
-
-
-
 def conjugate(part): # Find the conjugate of an integer partition
     # Slightly recoded from the Sage source code: http://www.sagenb.org/src/combinat/partition.py
         
@@ -25,9 +22,6 @@ def conjugate(part): # Find the conjugate of an integer partition
             conj.extend([i]*(part[i-1] - part[i]))
         return conj
             
-
-
-
 
 def NrParts(N,S): # Find the number of partition for a given total N and number of parts S
     # Recoded and modified from GAP source code: http://www.gap-system.org/
