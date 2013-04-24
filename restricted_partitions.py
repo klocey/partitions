@@ -1,61 +1,146 @@
-from sage.all import *
+#!/usr/bin/env sage -python
+import sys
+import numpy as np
+from scipy import stats
 import random
+from random import choice
+import re
+import math
+import random, decimal
 
-""" Three functions that, together, generate uniform random partitions of N having S parts.
-This method slows considerably for some values of S once N is greater than a few hundred.
-Overall, this method is less efficient than that located in misc_part_func.py of the partitions repository."""
+""" Functions for integer partitioning. Most apply to partitions of N having S parts """
 
 
-""" First, a function to find the smallest maximum addend for a partition of n with s parts """
 
-def min_max(n,s):
 
-    _min = int(floor(float(n)/float(s)))
+def conjugate(part): # Find the conjugate of an integer partition
+    # Slightly recoded from the Sage source code: http://www.sagenb.org/src/combinat/partition.py
+        
+    if part == []:
+        return []
+    else:
+        l = len(part)
+        conj =  [l]*part[-1]
+        for i in xrange(l-1,0,-1):
+            conj.extend([i]*(part[i-1] - part[i]))
+        return conj
+            
+
+
+
+
+def NrParts(N,S): # Find the number of partition for a given total N and number of parts S
+    # Recoded and modified from GAP source code: http://www.gap-system.org/
+    
+    s=0
+    if N == S or S == 1:
+        s = 1
+    elif N < S or S == 0:
+        s = 0
+    else:
+        n = int(N)
+        k = int(S)
+        p = [1]*n
+        
+        for i in range(2,k+1):  
+            for m  in range(i+1,n-i+1+1):
+                p[m] = p[m] + p[m-i]
+            
+        s = p[n-k+1]
+
+    return s;
+
+
+   
+def random_partition(n,s): # Generate a uniform random partition of n having s parts.
+    
+    numparts = NrParts(n,s)
+    which = random.randrange(1,numparts+1)
+    
+    part = [s] # first element of part must equal s (because the conjugate must have s parts)
+    n-= s # having found the first element, n is decreased by s
+    
+    while n:
+        for k in range(1,n+1):
+            count = NrParts(n+k,k) # number of partitions of N having K or less as the largest part
+            if count >= which:
+                count = NrParts(n+k-1,k-1)
+                break
+            
+        part.append(k)
+        n -= k
+        if n == 0: break
+        which -= count
+        
+    part = conjugate(part)
+    return part
+
+
+def rand_parts(N,S,sample_size): # Generate a sample of partitions of N having S parts 
+    parts = []
+    while len(parts) < sample_size:
+        part = random_partition(N,S)
+        parts.append(part)
+    
+    return parts
+
+
+
+def most_even_partition(n,s): # Find the last lexical (i.e. most even) partition of N having S parts
+    
+    most_even = [int(math.floor(float(n)/float(s)))]*s
+    _remainder = int(n%s)
+    
+    j = 0
+    while _remainder > 0:
+        most_even[j] += 1
+        _remainder -= 1
+        j += 1
+    return most_even
+
+
+
+def min_max(n,s): # Find the smallest possible maximum part a partition of N having S parts
+
+    _min = int(math.floor(float(n)/float(s)))
     if int(n%s) > 0:
         _min +=1
 
     return _min
+    
+    
+def firstpart(N,S,k): # Find the first lexical partition of N having S parts, and potentially k as the largest part
+    
+    if k == None:
+        part = [N-S+1]
+        ones = [1]*(S-1)
+        part.extend(ones)
+    return part
+    
+    if k < min_max(n,s):
+        return None
+        
+    #else:
+       
+    
+# The 2 functions below find the next lexical partition of N having S parts
 
+def portion(alist, indices):
 
-""" Next, A function that uses a cache and memoiziation to find the number of partitions of n with
-    s parts having x as the largest part. This is fast, but I think there's a more elegant solution
-    to be had. e.g., Often: P(N,S,max=K) = P(N-K,S-1) Thanks to ante (http://stackoverflow.com/users/494076/ante)
-    for helping me with this: Finding the number of integer partitions given a total, a number of parts,
-    and a maximum summand """
+    return [alist[i:j] for i, j in zip([0]+indices, indices+[None])]
 
-D = {}
-def P(n,s,x):
-    if n > s*x or x <= 0: return 0
-    if n == s*x: return 1
-    if (n,s,x) not in D:
-        D[(n,s,x)] = sum(P(n-i*x, s-i, x-1) for i in xrange(s))
-    return D[(n,s,x)]
-
-
-""" Finally, a function to find uniform random partitions of n with s parts, with no rejection rate! Each randomly chosen number codes for a specific partition of n having s parts. """
-
-def random_partition(n,s):
-    S = s
-    partition = []
-    _min = min_max(n,S)
-    _max = n-S+1
-
-    total = number_of_partitions(n,S)
-    which = random.randrange(1,total+1) # random number
-
-    while n:
-        for k in range(_min,_max+1):
-            count = P(n,S,k)
-            if count >= which:
-                count = P(n,S,k-1)
-                break
-
-        partition.append(k)
-        n -= k
-        if n == 0: break
-        S -= 1
-        which -= count
-        _min = min_max(n,S)
-        _max = k
-
-    return partition
+def next_restricted_part(p,n,s):
+    
+    #if p == most_even_partition(n,s):return firstpart(n,s,k=None).first()
+    
+    for i in enumerate(reversed(p)):
+        if i[1] - p[-1] > 1:
+            if i[0] == (s-1):
+                return firstpart(n,s,k=(i[1]-1))
+            else:
+                parts = portion(p,[s-i[0]-1]) # split p into the part that won't change and the part that will
+                h1 = parts[0]
+                h2 = parts[1]
+                next = firstpart(sum(h2),len(h2),k=h2[0]-1)
+                return h1+next
+                
