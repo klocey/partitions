@@ -1,44 +1,92 @@
-# place to store misc. functions, little organization as of yet
+#!/usr/bin/env sage -python
+import sys
+import numpy as np
+from scipy import stats
+import random
+from random import choice
+import re
+import math
+import random, decimal
 
+""" Functions for integer partitioning. Most apply to partitions of N having S parts """
 
-Q = 10 # the total
-N = 2  # number of parts
-K = 8  # largest part
-i = 0
-#print Partitions(Q,length=N,max_part=K).cardinality() # Sage is very slow at this
+# Find the conjugate of an integer partition
+# Taken from the Sage source code: http://www.sagenb.org/src/combinat/partition.py
 
-Q = 4 # the total
-N = 2 # number of parts
-K = 2 # largest part
-
-i = 0
-#print Partitions(Q,length=N,max_part=K).cardinality() # Sage is very slow at this
-
-print Q,N,K,'\n'
-print 'i Q  N K  _sum'
-
-def parts_nsx(i,Q,N,K):
-    print i,Q,N,K
-    if Q==0 and N==0:
-        print 'found one, K=',K
-        return 1
-    if Q<=0 or N<=0 or K<=0:
-        print 'change i'
-        return 0
-    if Q>0 and N>0 and K>0:
-        _sum = 0
-        for i in range(0,N+1):
-            print 'K=',K,'decrease K'
-            _sum += parts_nsx(i,Q-i*K, N-i, K-1)
+def conjugate(part):
+        
+    if part == []:
+        return []
+    else:
+        l = len(part)
+        conj =  [l]*part[-1]
+        for i in xrange(l-1,0,-1):
+            conj.extend([i]*(part[i-1] - part[i]))
+        return conj
             
-        return _sum
+
+# Find the number of partition for a given total N and number of parts S
+# Taken from GAP source code: http://www.gap-system.org/
+
+def NrParts(N,S):
+    
+    s=0
+    if N == S or S == 1:
+        s = 1
+    elif N < S or S == 0:
+        s = 0
+    else:
+        n = int(N)
+        k = int(S)
+        p = [1]*n
+        
+        for i in range(2,k+1):  
+            for m  in range(i+1,n-i+1+1):
+                p[m] = p[m] + p[m-i]
             
-print parts_nsx(i,Q,N,K)
+        s = p[n-k+1]
+
+    return s;
 
 
+# Generate a uniform random partition of n having s parts. 
+# Derived by Ken J. Locey
+    
+def random_partition(n,s):
+    
+    numparts = NrParts(n,s)
+    which = random.randrange(1,numparts+1)
+    
+    part = [s] # first element of part must equal s (because the conjugate must have s parts)
+    n-= s # having found the first element, n is decreased by s
+    
+    while n:
+        for k in range(1,n+1):
+            count = NrParts(n+k,k) # number of partitions of N having K or less as the largest part
+            if count >= which:
+                count = NrParts(n+k-1,k-1)
+                break
+            
+        part.append(k)
+        n -= k
+        if n == 0: break
+        which -= count
+        
+    part = conjugate(part)
+    return part
 
-######################### following all pertains to accomplishing one task
+# Generate a sample of partitions of N having S parts 
+def rand_parts(N,S,sample_size):
+    parts = []
+    while len(parts) < sample_size:
+        part = random_partition(N,S)
+        parts.append(part)
+    
+    return parts
 
+
+# Find the last lexical (i.e. most even) partition of N having S parts
+# derived by Ken J. Locey
 def most_even_partition(n,s):
     most_even = [int(floor(float(n)/float(s)))]*s
     _remainder = int(n%s)
@@ -50,6 +98,9 @@ def most_even_partition(n,s):
         j += 1
     return most_even
 
+
+# Find the next lexical partition of N having S parts
+# Derived by Ken J. Locey, uses Sage but this will change
 
 def portion(alist, indices):
 
@@ -70,12 +121,4 @@ def next_restricted_part(p,n,s):
                 next = list(Partitions(sum(h2),length=len(h2),max_part=(h2[0]-1)).first())
                 return h1+next
                 
-N = 10
-S = 2
-p = list(Partitions(N,length=S).first())
-
-for i in range(1,6):
-    p = next_restricted_part(p,sum(p),len(p))         
-    print p
-
 
