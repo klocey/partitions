@@ -3,7 +3,7 @@ import random
 
 """ Three functions that, together, generate uniform random partitions of N having S parts.
 This method slows considerably for some values of S once N is greater than a few hundred.
-"""
+Overall, this method is less efficient than that located in misc_part_func.py of the partitions repository."""
 
 
 """ First, a function to find the smallest maximum addend for a partition of n with s parts """
