@@ -1,6 +1,11 @@
 from sage.all import *
 import random
 
+""" Three functions that, together, generate uniform random partitions of N having S parts.
+This method slows considerably for some values of S once N is greater than a few hundred.
+"""
+
+
 """ First, a function to find the smallest maximum addend for a partition of n with s parts """
 
 def min_max(n,s):
