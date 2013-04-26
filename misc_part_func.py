@@ -8,9 +8,23 @@ import re
 import math
 import random, decimal
 
-""" Functions for integer partitioning. Most apply to partitions of N having S parts """
+""" Functions for integer partitioning. Most apply to partitions of N having S parts
 
+Included functions:
 
+1. conjugate(): get the conjugate of an integer partition
+2. NrParts(): Find the number of partitions for a given total N and number of parts S
+
+3. rand_parts1(): Generate uniform random integer partitions of n having s parts. 
+4. rand_parts2(): Generate uniform random integer partitions of n having s parts.
+
+5. rand_parts_zero1(): Generate uniform random partitions of n having s parts, where some parts may = 0. 
+6. rand_parts_zero2(): Generate uniform random partitions of n having s parts, where some parts may = 0. 
+
+7. most_even_partition(): Get the last lexical (i.e. most even) partition of N having S parts (no zeros)
+8. min_max(): Get the smallest possible maximum part a partition of N having S parts (no zeros)
+9. firstpart(): Get the first lexical partition of N having S parts with k as the largest part (no zeros)
+10. next_restricted_part(): Get the next lexical partition of N having S parts """
 
 
 def conjugate(part): # Find the conjugate of an integer partition
