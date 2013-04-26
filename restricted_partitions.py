@@ -8,7 +8,9 @@ import re
 import math
 import random, decimal
 
-""" Functions for integer partitioning. Most apply to partitions of N having S parts """
+""" Functions for integer partitioning. The main function here is random_partition();
+    other function support it. random_partition() is a variant of other random partitioning
+    algorithms found in this repo. More functions to come. """
 
 def conjugate(part): # Find the conjugate of an integer partition
     # Slightly recoded from the Sage source code: http://www.sagenb.org/src/combinat/partition.py
@@ -77,64 +79,3 @@ def rand_parts(N,S,sample_size): # Generate a sample of partitions of N having S
         parts.append(part)
     
     return parts
-
-
-
-def most_even_partition(n,s): # Find the last lexical (i.e. most even) partition of N having S parts
-    
-    most_even = [int(math.floor(float(n)/float(s)))]*s
-    _remainder = int(n%s)
-    
-    j = 0
-    while _remainder > 0:
-        most_even[j] += 1
-        _remainder -= 1
-        j += 1
-    return most_even
-
-
-
-def min_max(n,s): # Find the smallest possible maximum part a partition of N having S parts
-
-    _min = int(math.floor(float(n)/float(s)))
-    if int(n%s) > 0:
-        _min +=1
-
-    return _min
-    
-    
-def firstpart(N,S,k): # Find the first lexical partition of N having S parts, and potentially k as the largest part
-    
-    if k == None:
-        part = [N-S+1]
-        ones = [1]*(S-1)
-        part.extend(ones)
-    return part
-    
-    if k < min_max(n,s):
-        return None
-        
-    #else:
-       
-    
-# The 2 functions below find the next lexical partition of N having S parts
-
-def portion(alist, indices):
-
-    return [alist[i:j] for i, j in zip([0]+indices, indices+[None])]
-
-def next_restricted_part(p,n,s):
-    
-    #if p == most_even_partition(n,s):return firstpart(n,s,k=None).first()
-    
-    for i in enumerate(reversed(p)):
-        if i[1] - p[-1] > 1:
-            if i[0] == (s-1):
-                return firstpart(n,s,k=(i[1]-1))
-            else:
-                parts = portion(p,[s-i[0]-1]) # split p into the part that won't change and the part that will
-                h1 = parts[0]
-                h2 = parts[1]
-                next = firstpart(sum(h2),len(h2),k=h2[0]-1)
-                return h1+next
-                
