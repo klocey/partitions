@@ -125,7 +125,92 @@ def rand_parts2(N,S,sample_size): # Generate a uniform random partition of n hav
     
     return parts
     
+def rand_parts_zero1(N,S,sample_size):
+    """ Generate a uniform random partition of n having s parts, where some parts
+    may have zero values """
     
+    D = {}
+    def P(n,x):
+        if (n,x) not in D:
+            D[(n,x)] = NrParts(n+x,x)
+        return D[(n,x)] # number of partitions of n with s parts having x or less as the largest part
+    
+    parts = []
+    numparts = P(N,S)
+    
+    while len(parts) < sample_size:
+        
+        n = int(N)
+        part = []
+        which = random.randrange(1,numparts+1)
+        
+        while n:
+            for k in range(1,n+1):
+                count = P(n,k) # number of partitions of N having K or less as the largest part
+                if count >= which:
+                    count = P(n,k-1)
+                    break
+            
+            part.append(k)
+            n -= k
+            if n == 0: break
+            which -= count
+        
+        part = conjugate(part)
+        _len = len(part)
+        if _len < S:
+            zeros = [0]*(S-_len)
+            part.extend(zeros)
+        parts.append(part)
+    
+    return parts
+      
+def rand_parts_zero2(N,S,sample_size): # Generate a uniform random partition of n having k parts.
+    
+    D = {}
+    def P(n,x):
+        if (n,x) not in D:
+            D[(n,x)] = NrParts(n+x,x)
+        return D[(n,x)] # number of partitions of n with s parts having x or less as the largest part
+    
+    parts = []
+    numparts = P(N,S)
+    
+    while len(parts) < sample_size:
+    
+        n = int(N)
+        part = []
+        which = random.randrange(1,numparts+1)
+        _max = int(S)
+        _min = int(1)
+        
+        while n > 0:
+            k = random.randrange(_min, _max + 1)
+            upper = int(P(n,k))
+            lower = int(P(n,k-1))
+            if lower < which and which <= upper: 
+                part.append(k)
+                n -= k
+                _max = k
+                _min = 1
+                num = int(upper - lower)
+                which = random.randrange(1, num + 1)
+                
+            elif which > upper:
+                _min = k+1    
+            elif which <= lower:
+                _max = k-1        
+            
+        part = conjugate(part)
+        _len = len(part)
+        if _len < S:
+            zeros = [0]*(S-_len)
+            part.extend(zeros)
+        parts.append(part)
+    
+    return parts
+    
+        
 def most_even_partition(n,s): # Find the last lexical (i.e. most even) partition of N having S parts
     
     most_even = [int(math.floor(float(n)/float(s)))]*s
