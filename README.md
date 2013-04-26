@@ -6,7 +6,6 @@ python based code for integer partitioning
 
 GNU GENERAL PUBLIC LICENSE
 Version 2, June 1991
-
 =======
 
 partitions is a collection of Python coded functions useful for
