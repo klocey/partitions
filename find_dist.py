@@ -1,4 +1,4 @@
-Code that is currently underdevelopment for...you'll find out later
+""" Code in limbo """ 
 
 
 def last_part(Q,N):
