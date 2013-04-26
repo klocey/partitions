@@ -15,8 +15,8 @@ import random, decimal
 
 Included functions:
 
-1. conjugate(): get the conjugate of an integer partition
-2. NrParts(): Find the number of partitions for a given total N and number of parts S
+1. conjugate(): get the conjugate of an integer partition (recoded from Sage, see below)
+2. NrParts(): Find the number of partitions for a given total N and number of parts S (modified and recoded from GAP, see below)
 
 3. rand_parts1(): Generate uniform random integer partitions of n having s parts. Starts at small end of the feasible set. 
 4. rand_parts2(): Generate uniform random integer partitions of n having s parts. Starts at random points in the feasible set.
@@ -31,7 +31,8 @@ Included functions:
 
 
 def conjugate(part): # Find the conjugate of an integer partition
-    # Slightly recoded from the Sage source code: http://www.sagenb.org/src/combinat/partition.py
+    # Recoded (orginally on 24-Apr-2013) from the Sage source code:
+    # http://www.sagenb.org/src/combinat/partition.py
         
     if part == []:
         return []
@@ -45,7 +46,8 @@ def conjugate(part): # Find the conjugate of an integer partition
   
 
 def NrParts(N,S): # Find the number of partition for a given total N and number of parts S
-    # Recoded and modified from GAP source code: http://www.gap-system.org/
+    # Recoded (originally on 24-Apr-2013) and modified from GAP source code:
+    # http://www.gap-system.org/
     
     s=0
     if N == S or S == 1:
