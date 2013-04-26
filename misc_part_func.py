@@ -15,11 +15,11 @@ Included functions:
 1. conjugate(): get the conjugate of an integer partition
 2. NrParts(): Find the number of partitions for a given total N and number of parts S
 
-3. rand_parts1(): Generate uniform random integer partitions of n having s parts. 
-4. rand_parts2(): Generate uniform random integer partitions of n having s parts.
+3. rand_parts1(): Generate uniform random integer partitions of n having s parts. Starts at small end of the feasible set. 
+4. rand_parts2(): Generate uniform random integer partitions of n having s parts. Starts at random points in the feasible set.
 
-5. rand_parts_zero1(): Generate uniform random partitions of n having s parts, where some parts may = 0. 
-6. rand_parts_zero2(): Generate uniform random partitions of n having s parts, where some parts may = 0. 
+5. rand_parts_zero1(): Generate uniform random partitions of n having s parts, where some parts may = 0. Starts at small end of the feasible set.
+6. rand_parts_zero2(): Generate uniform random partitions of n having s parts, where some parts may = 0. Starts at random points in the feasible set.
 
 7. most_even_partition(): Get the last lexical (i.e. most even) partition of N having S parts (no zeros)
 8. min_max(): Get the smallest possible maximum part a partition of N having S parts (no zeros)
