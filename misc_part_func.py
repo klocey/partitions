@@ -98,28 +98,27 @@ def rand_parts2(N,S,sample_size): # Generate a uniform random partition of n hav
     while len(parts) < sample_size:
     
         which = random.randrange(1,numparts+1)
-        n = N-S 
-        part = [S] 
+        n = int(N-S)
+        part = [S]
         _max = int(S)
-        _min = 1
+        _min = int(1)
         
         while n > 0:
             k = random.randrange(_min, _max + 1)
-            upper = P(n, k)  
-            num = NrParts(n, k)
-            lower = upper - num + 1
-            if lower <= which and which <= upper: 
+            upper = int(P(n,k))
+            lower = int(P(n,k-1))
+            if lower < which and which <= upper: 
                 part.append(k)
                 n -= k
                 _max = k
                 _min = 1
-                which = random.randrange(1, num+1)
+                num = int(upper - lower)
+                which = random.randrange(1, num + 1)
                 
             elif which > upper:
                 _min = k+1    
-            elif which < lower:
+            elif which <= lower:
                 _max = k-1            
-            
             
         part = conjugate(part)
         parts.append(part)
