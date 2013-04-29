@@ -1,12 +1,12 @@
-#!/usr/bin/env sage -python
+#!/usr/bin/python
+
 import sys
 import numpy as np
 from scipy import stats
-import random
+import random, decimal
 from random import choice
 import re
 import math
-import random, decimal
 
 """ Functions for integer partitioning. Most apply to using integer partitioning to examine distributions
     of wealth and abundance using the feasible set. The feasible set is the set all forms of the distribution
@@ -255,17 +255,18 @@ def min_max(n,s): # Find the smallest possible maximum part a partition of N hav
     
 def firstpart(N,S,k): # Find the first lexical partition of N having S parts with k as the largest part
     
+    part = []
     if k == None:
-        part = [N-S+1]
+        part.append(N-S+1)
         ones = [1]*(S-1)
         part.extend(ones)
-    return part
+        return part
     
-    if k < min_max(n,s):
+    if k < min_max(N,S):
         return None
         
     else:
-        part = [k]
+        part.append(k)
         N -= k
         S -= 1
         while N > 0:
@@ -279,22 +280,21 @@ def firstpart(N,S,k): # Find the first lexical partition of N having S parts wit
     
 # The 2 functions below find the next lexical partition of N having S parts
 
-def portion(alist, indices):
-
-    return [alist[i:j] for i, j in zip([0]+indices, indices+[None])]
-
 def next_restricted_part(p,n,s):
-    
-    #if p == most_even_partition(n,s):return firstpart(n,s,k=None).first()
-    
+    n = sum(p)
+    s = len(p)
+    if p == most_even_partition(n,s):
+        return firstpart(n,s,None)
+
     for i in enumerate(reversed(p)):
         if i[1] - p[-1] > 1:
             if i[0] == (s-1):
-                return firstpart(n,s,k=(i[1]-1))
+                p = firstpart(n,s,int(i[1]-1))
+                return p
             else:
-                parts = portion(p,[s-i[0]-1]) # split p into the part that won't change and the part that will
-                h1 = parts[0]
-                h2 = parts[1]
-                next = firstpart(sum(h2),len(h2),k=h2[0]-1)
+                parts = np.split(p,[s-i[0]-1])
+                h1 = list(parts[0])
+                h2 = list(parts[1])
+                next = list(firstpart(int(sum(h2)),int(len(h2)),int(h2[0])-1))
                 return h1+next
                 
