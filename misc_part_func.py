@@ -7,6 +7,7 @@ import random, decimal
 from random import choice
 import re
 import math
+import itertools
 
 """ Functions for integer partitioning. Most apply to using integer partitioning to examine distributions
     of wealth and abundance using the feasible set. The feasible set is the set all forms of the distribution
@@ -280,7 +281,7 @@ def firstpart(N,S,k): # Find the first lexical partition of N having S parts wit
     
 # The 2 functions below find the next lexical partition of N having S parts
 
-def next_restricted_part(p,n,s):
+def next_restricted_part(p):
     n = sum(p)
     s = len(p)
     if p == most_even_partition(n,s):
