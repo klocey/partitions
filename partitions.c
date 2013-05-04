@@ -1,5 +1,5 @@
 
-void NrParts(int *n, int *k, int *p) {
+void NrParts(int *n, int *k, double *p) {
   int i, m ; 
   for (i = 2 ; i < (*k + 1) ; i++) {
     if ((i + 1) <= (*n - i + 1 + 1)) {
