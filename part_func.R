@@ -21,21 +21,30 @@
 
 dyn.load("partitions.dll")
 
+library(hash)
+
+lappend <- function (lst, ...){
+  lst <- c(lst, list(...))
+  return(lst)
+}
+
+last = function(x) { tail(x, n = 1) }
+
 conjugate = function(part){ # Find the conjugate of an integer partition
   # Recoded (orginally on 24-Apr-2013) from the Sage source code:
   # http://www.sagenb.org/src/combinat/partition.py
-  if part == []
-    conj = []
+  if (is.null(part))
+    conj = NULL
   else {
     l = length(part)
-    conj =  [l] * part[-1]
-    for i in xrange(l-1,0,-1):
-      conj.extend([i]*(part[i-1] - part[i]))
+    conj = rep(l, last(part))
+    for (i in (l - 1):1)
+      conj = c(conj, rep(i, part[i] - part[i+1]))
   }
   return(conj)
 }
 
-NrParts = function(N, S, use_C = FALSE){ 
+NrParts = function(N, S, use_c = FALSE){ 
   # Find the number of partition for a given total N and number of parts S
   # Recoded (originally on 24-Apr-2013) and modified from GAP source code:
   # http://www.gap-system.org/
@@ -50,8 +59,8 @@ NrParts = function(N, S, use_C = FALSE){
     n = N
     k = S
     p = rep(1, n)
-    if (use_C) {
-      p = .C("NrParts", n = as.integer(n), k = as.integer(k), p = as.integer(p))$p
+    if (use_c) {
+      p = .C("NrParts", n = as.integer(n), k = as.integer(k), p = as.double(p))$p
     }
     else {
       for (i in 2:k) {
@@ -67,108 +76,41 @@ NrParts = function(N, S, use_C = FALSE){
   return(s)
 }
 
-k = 4
-n = 10
-for (i in 2:k) {
-  if ((i + 1) <= (n - i + 1)) {
-    for (m in (i + 1):(n - i + 1)) {
-      #print(m)
-      print(m - i)
-    }
+rand_parts1 = function(N, S, sample_size, use_c=FALSE) { 
+  # Generate a uniform random partition of n having s parts.
+  D = hash()
+  P = function(n, x, use_c) {
+    key = paste(n, x, sep=',')
+    if (!has.key(key, D))
+      D[key] = NrParts(n + x, x, use_c)
+    # number of partitions of n having x or less as the largest part
+    return(D[[key]])
   }
-}
-
-
-
-def NrParts(N,S): # Find the number of partition for a given total N and number of parts S
-  # Recoded (originally on 24-Apr-2013) and modified from GAP source code:
-  # http://www.gap-system.org/
-  
-  s=0
-if N == S or S == 1:
-  s = 1
-elif N < S or S == 0:
-  s = 0
-else:
-  n = int(N)
-k = int(S)
-p = [1]*n
-
-i = 2
-m = 3
-p[3] = p[3] + p[3 - 2 = 1]
-p[4] = p[4] + p[2]
-
-  
-for i in range(2, k + 1):   ## 2 to k
-  for m  in range(i+1,n-i+1+1): ## 3 to N - i + 1
-  p[m] = p[m] + p[m - i] # index pos start 2 and 1
-
-s = p[n-k+1]
-
-k = 4
-n = 10
-for (i in 2:k) {
-  if ((i + 1) <= (n - i + 1)) {
-    for (m in (i + 1):(n - i + 1)) {
-      #print(m)
-      print(m - i)
+  parts = list()
+  numparts = P(N - S, S, use_c)
+  while (length(parts) < sample_size) {
+    n = N - S
+    part = S # first element of part must equal s (because the conjugate must have s parts)
+    which = sample(numparts, 1)
+    while (n > 0) {
+      for (k in 1:n) {
+        count = P(n, k, use_c) # number of partitions of N having K or less as the largest part
+        if (count >= which) {
+          count = P(n, k - 1, use_c)
+          break
+        }
+      }  
+      part = c(part, k)
+      n = n - k
+      if (n == 0)
+        break
+      which = which - count
     }
-  }
+    part = conjugate(part)
+    parts= lappend(parts, part)
+  }  
+  return(parts)
 }
-
-k = 4
-n = 10
-for (i in 3:(k + 1)) {
-  if ((i + 1) <= (n - i + 2)) {
-    for (m in (i + 1):(n - i + 3)) {
-      #print(m)
-      print(m - i + 1)
-    }
-  }
-}
-
-s = p[n - k + 1]
-
-return s;
-
-
-
-
-def rand_parts1(N,S,sample_size): # Generate a uniform random partition of n having s parts.
-  
-  D = {}
-def P(n,x):
-  if (n,x) not in D:
-  D[(n,x)] = NrParts(n+x,x)
-return D[(n,x)] # number of partitions of n having x or less as the largest part
-
-parts = []
-numparts = P(N-S,S)
-
-while len(parts) < sample_size:
-  
-  n = N-S
-part = [S] # first element of part must equal s (because the conjugate must have s parts)
-
-which = random.randrange(1,numparts+1)
-
-while n:
-  for k in range(1,n+1):
-  count = P(n,k) # number of partitions of N having K or less as the largest part
-if count >= which:
-  count = P(n,k-1)
-break
-
-part.append(k)
-n -= k
-if n == 0: break
-which -= count
-
-part = conjugate(part)
-parts.append(part)
-return parts
-
 
 def rand_parts2(N,S,sample_size): # Generate a uniform random partition of n having k parts.
   
