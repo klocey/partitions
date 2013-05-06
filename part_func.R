@@ -22,16 +22,10 @@ dyn.load("partitions.dll")
 
 library(hash)
 
-lappend = function (lst, ...){
-  lst = c(lst, list(...))
-  return(lst)
-}
-
 rand_int = function( min=0, max=1) {
   int = ceiling(runif(1, min - 1, max))
   return(int)
 }
-
 
 last = function(x) { tail(x, n = 1) }
 
@@ -58,34 +52,6 @@ conjugate = function(part, use_c=TRUE){
       for (i in (l - 1):1)
         conj = c(conj, rep(i, part[i] - part[i+1]))
     }  
-  }
-  return(conj)
-}
-
-conjugate2 = function(part, use_c=TRUE){ 
-  # Find the conjugate of an integer partition
-  # Recoded (orginally on 24-Apr-2013) from the Sage source code:
-  # http://www.sagenb.org/src/combinat/partition.py
-  if (is.null(part))
-    conj = NULL
-  else {
-    l = length(part)
-    conj = rep(NA, max(part))
-    conj[1:last(part)] = rep(l, last(part))
-    if (use_c) {
-      #conj = .C("conjugate", 
-    }  
-    else {
-      j = last(part) + 1
-      for (i in (l - 1):1) {
-        times = part[i] - part[i + 1]
-        if (times > 0) {
-          k = j + times - 1
-          conj[j:k] = rep(i, times)
-          j = k + 1
-        }  
-      }
-    }
   }
   return(conj)
 }
