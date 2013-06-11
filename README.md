@@ -15,6 +15,7 @@ particular Q-N combination.
 
 restricted_partitions.py --contains miscellaneous partitioning functions.
 
+find_dist.py --misc. partitioning code in limbo.
 
 
 
