@@ -1,7 +1,22 @@
-partitions
-==========
+partitions--Code for integer partitioning
+=========================================
 
-python based code for integer partitioning 
+Files
+-----
+
+misc_part_func.py --contains the primary functions.
+
+rand_part_kdens.py --used to reveal that the functions are unbiased.
+
+random_part_time2.py --makes time comparisons between random partitioning functions.
+
+random_part_time_simple.py --used to find the number of seconds for generating a random partition for a
+particular Q-N combination.
+
+restricted_partitions.py --contains miscellaneous partitioning functions.
+
+find_dist.py --misc. partitioning code in limbo.
+
 
 
 GNU GENERAL PUBLIC LICENSE
