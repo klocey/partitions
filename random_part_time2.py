@@ -82,7 +82,7 @@ while ii <= 3: # for the first 3 subplots (i.e. 1st row)
         Ss = range(int(N/20.0),int(0.8*N),int(N/20.0))
         for S in Ss:    
             with Timer() as t:
-                if N < 250 or S >= int(N/2.0): x = parts.rand_parts1(N,S,sample_size)
+                if N < 250 or S >= int(N/1.5): x = parts.rand_parts1(N,S,sample_size)
                 else: x = parts.rand_parts2(N,S,sample_size)
             for i in range(1):
                 R3_times.append(round(t.interval,2))
