@@ -27,11 +27,11 @@ class Timer:
         self.interval = self.end - self.start
         
         
-def rand_part_Sage(N,S,sample_size):
+def rand_part_Sage(Q,N,sample_size):
     parts = []
     while len(parts) < sample_size:
-        part = Partitions(N).random_element()
-        if len(part) == S:
+        part = Partitions(Q).random_element()
+        if len(part) == N:
             parts.append(part)
     
     return parts
@@ -50,47 +50,52 @@ fig = plt.figure()
 ii = 1
 a = 0.9
 
-Ns = [100,500,1000] # N values
-sample_size = 100 # number of partitions to generate for each N-S combo
+Qs = [100,500,1000] # N values
+sample_size = 300 # number of partitions to generate for each N-S combo
 
 while ii <= 3: # for the first 3 subplots (i.e. 1st row)
-    for N in Ns:
-        print N
+    for Q in Qs:
+        print Q
         ax = fig.add_subplot(2,3,ii)
     
         R1_times = [] # using 'bottom-up' method
-        Ss = range(int(N/20.0),int(0.8*N),int(N/20.0)) # S values
-        for S in Ss:    
+        Ns = range(int(Q/20.0),int(0.8*Q),int(Q/20.0)) # S values
+        for N in Ns:    
             with Timer() as t:
-                x = parts.rand_parts1(N,S,sample_size)
+                zeros = 'no'
+                which = 'bottom_up'
+                x = parts.rand_parts(Q,N,sample_size,which,zeros)
             for i in range(1):
                 R1_times.append(round(t.interval,2))
-        print 'R1',N,R1_times
-        plt.plot(Ss,R1_times,lw=3,color='r',label='R1, N='+str(N),alpha=a)
+        print 'R1',Q,R1_times
+        plt.plot(Ns,R1_times,lw=3,color='r',label='R1, Q='+str(Q),alpha=a)
  
         R2_times = [] # using 'divide-and-conquer' method
-        Ss = range(int(N/20.0),int(0.8*N),int(N/20.0))
-        for S in Ss:    
+        Ns = range(int(Q/20.0),int(0.8*Q),int(Q/20.0))
+        for N in Ns:    
             with Timer() as t:
-                x = parts.rand_parts2(N,S,sample_size)
+                zeros = 'no'
+                which = 'divide_and_conquer'
+                x = parts.rand_parts(Q,N,sample_size,which,zeros)
             for i in range(1):
                 R2_times.append(round(t.interval,2))
-        print 'R2',N,R2_times
-        plt.plot(Ss,R2_times,lw=3,color='b',label='R2, N='+str(N),alpha=a)
+        print 'R2',Q,R2_times
+        plt.plot(Ns,R2_times,lw=3,color='b',label='R2, Q='+str(Q),alpha=a)
     
         R3_times = [] # using either 'divide-and-conquer' or 'bottom up'
-        Ss = range(int(N/20.0),int(0.8*N),int(N/20.0))
-        for S in Ss:    
+        Ns = range(int(Q/20.0),int(0.8*Q),int(Q/20.0))
+        for N in Ns:    
             with Timer() as t:
-                if N < 250 or S >= int(N/1.5): x = parts.rand_parts1(N,S,sample_size)
-                else: x = parts.rand_parts2(N,S,sample_size)
+                zeros = 'no'
+                which = 'best'
+                x = parts.rand_parts(Q,N,sample_size,which,zeros)
             for i in range(1):
                 R3_times.append(round(t.interval,2))
-        print 'R3',N,R3_times      
-        plt.plot(Ss,R3_times,lw=3,color='m',label='R3, N='+str(N),alpha=a)
+        print 'R3',Q,R3_times      
+        plt.plot(Ns,R3_times,lw=3,color='m',label='R3, Q='+str(Q),alpha=a)
     
         plt.tick_params(axis='both', which='major', labelsize=8)
-        plt.xlabel("S",fontsize=8)
+        plt.xlabel("N",fontsize=8)
         if ii == 1:
             plt.ylim(0.0,0.1)
             plt.ylabel("Seconds",fontsize=8)
@@ -100,32 +105,33 @@ while ii <= 3: # for the first 3 subplots (i.e. 1st row)
         ii+=1   
 
 
-Ns = [50,100,200]
+Qs = [50,100,200]
 sample_size = 100
     
 while ii <= 6: # for the last three subplots (i.e. 2nd row)
-    for N in Ns:
+    for Q in Qs:
         ax = fig.add_subplot(2,3,ii)
     
         R3_times = [] # using either 'divide-and-conquer' or 'bottom up'
-        Ss = range(int(N/20.0),int(0.5*N),int(N/20.0))
-        for S in Ss:    
-            print 'KJL',S
+        Ns = range(int(Q/10.0),int(0.5*Q),int(Q/10.0))
+        for N in Ns:    
+            print 'KJL',N
             with Timer() as t:
-                if N < 250 or S >= int(N/1.5): x = parts.rand_parts1(N,S,sample_size)
-                else: x = parts.rand_parts2(N,S,sample_size)
+                zeros = 'no'
+                which = 'best'
+                x = parts.rand_parts(Q,N,sample_size,which,zeros)
             for i in range(1):
                 R3_times.append(round(t.interval,2))
-        print 'R3',N,R3_times
+        print 'R3',Q,R3_times
 
         Sage_times = []
-        for S in Ss:    
-            print 'Sage',S
+        for N in Ns:    
+            print 'Sage',N
             with Timer() as t:
-                x = rand_part_Sage(N,S,sample_size)
+                x = rand_part_Sage(Q,N,sample_size)
             for i in range(1):
                 Sage_times.append(round(t.interval,2))
-        print 'Sage',N,Sage_times,'\n'
+        print 'Sage',Q,Sage_times,'\n'
 
         Y = []
         for i, t in enumerate(R3_times):
@@ -133,14 +139,14 @@ while ii <= 6: # for the last three subplots (i.e. 2nd row)
                 Y.append(t/float(Sage_times[i]))
             else:
                 Y.append(1.0)
-        plt.plot(Ss,Y,lw=3,color='m',label='R3, N='+str(N),alpha=a)
+        plt.plot(Ns,Y,lw=3,color='m',label='R3, Q='+str(Q),alpha=a)
     
         if ii == 4:
             plt.ylabel("time(algorithm)/time(sage)",fontsize=8)
         
         ii+=1
         plt.tick_params(axis='both', which='major', labelsize=8)
-        plt.xlabel("S",fontsize=8)
+        plt.xlabel("N",fontsize=8)
         plt.ylim(0.0,0.2)
         #plt.setp(axins, xticks=Ns,yticks=[0.2,0.4,0.6,0.8,1.0])
         leg = plt.legend(loc=1,prop={'size':8})
