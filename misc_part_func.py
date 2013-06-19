@@ -38,7 +38,7 @@ def P(D,q,k):
         
     if (q,k) not in D:
         D[(q,k)] = NrParts(q+k,k)
-    return [D, D[(q,k)]] 
+    return [D, D[(q,k)]] # return the updated dictionary and P(q+k,k).
 
 def conjugate(part):
     """ Find the conjugate of an integer partition. Recoded (on 24-Apr-2013)
