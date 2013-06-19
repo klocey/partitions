@@ -34,16 +34,21 @@ while func <= 4:
     ax = ax = fig.add_subplot(2,2,func)
 
     if func < 3:
-        N = 50
-        S = 10
+        Q = 50
+        N = 10
     else:
-        N = 500 # The full feasible set can't be generated for N = 500 & S = 50
-        S = 50
+        Q = 500 # The full feasible set can't be generated for N = 500 & S = 50
+        N = 50
     
     for i in range(1,6):
         partitions = []
-        if func == 1 or func == 3: partitions = parts.rand_parts1(N,S,sample_size) # Use the 'bottom-up' function
-        else: partitions = parts.rand_parts_zero1(N,S,sample_size) # Use the 'bottom-up' function allowing zeros
+        which = 'bottom_up'
+        if func == 1 or func == 3:
+            zeros = 'no'
+            partitions = parts.rand_parts(Q,N,sample_size,which,zeros)
+        else:
+            zeros = 'yes'
+            partitions = parts.rand_parts(Q,N,sample_size,which,zeros)
         #D = metrics.get_kdens_obs_Evar(partitions) # evenness
         #D = metrics.get_kdens_obs_gini(partitions) # inequality
         D = metrics.get_kdens_obs_var(partitions) # variance
@@ -55,8 +60,13 @@ while func <= 4:
     
     for i in range(1,6):
         partitions = []
-        if func == 1 or func == 3: partitions = parts.rand_parts2(N,S,sample_size) # Use the function defined above and derived by Ken Locey
-        else: partitions = parts.rand_parts_zero2(N,S,sample_size) # Use the function defined above and derived by Ken Locey
+        which = 'divide_and_conquer'
+        if func == 1 or func == 3:
+            zeros = 'no'
+            partitions = parts.rand_parts(Q,N,sample_size,which,zeros) 
+        else:
+            zeros = 'yes'
+            partitions = parts.rand_parts(Q,N,sample_size,which,zeros)
         #D = metrics.get_kdens_obs_Evar(partitions) # evenness
         #D = metrics.get_kdens_obs_gini(partitions) # inequality
         D = metrics.get_kdens_obs_var(partitions) # variance
@@ -69,8 +79,7 @@ while func <= 4:
     if func == 1: # using the full feasible set, no zero values (i.e. proper integer partitions)
         for i in range(1,2):
             partitions = []
-        
-            for p in Partitions(N,length=S):
+            for p in Partitions(Q,length=N):
                 partitions.append(p)
         
         #D = metrics.get_kdens_obs_Evar(partitions) # evenness
@@ -84,25 +93,25 @@ while func <= 4:
     elif func == 2: # using the full feasible set, zero values included
         for i in range(1,2):
             partitions = []    
-            s = 1
-            while s <= S:
+            n = 1
+            while n <= N:
                 
-                numparts = parts.NrParts(N,s)    
-                part = parts.firstpart(N,s,None)
+                numparts = parts.NrParts(Q,n)    
+                part = parts.firstpart(Q,n,None)
                 ct2 = 0
                 while ct2 < numparts:
                     
                     part = parts.next_restricted_part(part)
-                    if len(part) == S: partitions.append(part) 
+                    if len(part) == N: partitions.append(part) 
                     else:
                         part2 = list(part)
-                        zeros = [0]*(S-len(part))
+                        zeros = [0]*(N-len(part))
                         part2.extend(zeros)
                         partitions.append(part2)
                         
                     #print func,numparts-ct2
                     ct2+=1
-                s+=1
+                n+=1
         #D = metrics.get_kdens_obs_Evar(partitions) # evenness
         #D = metrics.get_kdens_obs_gini(partitions) # inequality
         D = metrics.get_kdens_obs_var(partitions) # variance
@@ -115,13 +124,13 @@ while func <= 4:
         for i in range(1,6):
             partitions = []
             while len(partitions) < sample_size: # Use the random partition function in Sage to generate a sample of partitions for N and S
-                part = Partitions(N).random_element()
-                if len(part) == S:
+                part = Partitions(Q).random_element()
+                if len(part) == N:
                     partitions.append(part)
                     #print func,i, sample_size - len(partitions)   
                 else:
                     part = list(Partition(part).conjugate())
-                    if len(part) == S:
+                    if len(part) == N:
                         partitions.append(part)
                         #print func,i,sample_size - len(partitions)   
             #D = metrics.get_kdens_obs_Evar(partitions) # evenness
@@ -137,11 +146,11 @@ while func <= 4:
         for i in range(1,6):
             partitions = []
             while len(partitions) < sample_size: # Use the random partition function in Sage to generate a sample of partitions for N and S
-                part = list(Partitions(N).random_element())
-                if len(part) == S:
+                part = list(Partitions(Q).random_element())
+                if len(part) == N:
                     partitions.append(part)
-                elif len(part) < S:
-                    zeros = [0]*(S-len(part))
+                elif len(part) < N:
+                    zeros = [0]*(N-len(part))
                     part.extend(zeros)
                     partitions.append(part)
                 
@@ -161,12 +170,12 @@ while func <= 4:
     if func == 1 or func == 3:
         plt.plot([0],[0], color='r', lw=2, label = 'R1')
         plt.plot([0],[0], color='b',lw=2, label='R2')    
-        plt.plot([0],[0], color='k',lw=2, label='feasible set, N='+str(N)+',S='+str(S),alpha=0.5)
+        plt.plot([0],[0], color='k',lw=2, label='feasible set, Q='+str(Q)+',N='+str(N),alpha=0.5)
         plt.ylabel("pdf",fontsize=8)    
     else:
         plt.plot([0],[0], color='r', lw=2, label = 'R1-zeros')
         plt.plot([0],[0], color='b',lw=2, label='R2-zeros')    
-        plt.plot([0],[0], color='k',lw=2, label='feasible set, N='+str(N)+',S='+str(S)+', with zeros',alpha=0.5)    
+        plt.plot([0],[0], color='k',lw=2, label='feasible set, Q='+str(Q)+',N='+str(N)+', with zeros',alpha=0.5)    
         
     print func
     func+=1
