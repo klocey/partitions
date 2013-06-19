@@ -12,29 +12,38 @@ import itertools
 """ Functions for integer partitioning. Most apply to using integer partitioning to examine distributions
     of wealth and abundance using the feasible set. The feasible set is the set all forms of the distribution
     having the same constraint values (e.g. total abundance N, species richness S). To my knowledge, no
-    mathematical environments have functions 3 through 10.
+    mathematical environments provide the last 4 functions listed below.
 
 Included functions:
 
-1. conjugate(): get the conjugate of an integer partition (recoded from Sage, see below)
-2. NrParts(): Find the number of partitions for a given total N and number of parts S (modified and recoded from GAP, see below)
+- conjugate(): get the conjugate of an integer partition (recoded from Sage, see below)
+- NrParts(): Find the number of partitions for a given total N and number of parts S (modified and recoded from GAP, see below)
 
-3. rand_parts1(): Generate uniform random integer partitions of n having s parts. Starts at small end of the feasible set. 
-4. rand_parts2(): Generate uniform random integer partitions of n having s parts. Starts at random points in the feasible set.
+Three functions to generate uniform random integer partitions of Q having N parts.
+Each allows the option to have summands with zero values
+- bottum_up(): Starts at small end of the feasible set 
+- divide_and_conquer(): Start at random points in the feasible set
+- best(): Calls one of the above two functions depending on the value of Q and Q/N
 
-5. rand_parts_zero1(): Generate uniform random partitions of n having s parts, where some parts may = 0. Starts at small end of the feasible set.
-6. rand_parts_zero2(): Generate uniform random partitions of n having s parts, where some parts may = 0. Starts at random points in the feasible set.
-
-7. most_even_partition(): Get the last lexical (i.e. most even) partition of N having S parts (no zeros)
-8. min_max(): Get the smallest possible maximum part a partition of N having S parts (no zeros)
-9. firstpart(): Get the first lexical partition of N having S parts with k as the largest part (no zeros)
-10. next_restricted_part(): Get the next lexical partition of N having S parts """
+Four partitioning functions not provided in other softwares
+- most_even_partition(): Get the last lexical (i.e. most even) partition of Q having N parts (no zeros)
+- min_max(): Get the smallest possible maximum part a partition of Q having N parts (no zeros)
+- firstpart(): Get the first lexical partition of Q having N parts with k as the largest part (no zeros)
+- next_restricted_part(): Get the next lexical partition of Q having N parts """
 
 
-def conjugate(part): # Find the conjugate of an integer partition
-    # Recoded (orginally on 24-Apr-2013) from the Sage source code:
-    # http://www.sagenb.org/src/combinat/partition.py
+def P(D,q,k):
+    """ number of partitions of q with k or less parts (or having k or less as the largest part),
+        i.e. P(q+k,k). D is a dictionary of P(q+k,k) values. """
         
+    if (q,k) not in D:
+        D[(q,k)] = NrParts(q+k,k)
+    return [D, D[(q,k)]] 
+
+def conjugate(part):
+    """ Find the conjugate of an integer partition. Recoded (on 24-Apr-2013)
+        from the Sage source code: www.sagenb.org/src/combinat/partition.py """
+    
     if part == []:
         return []
     else:
@@ -44,92 +53,122 @@ def conjugate(part): # Find the conjugate of an integer partition
             conj.extend([i]*(part[i-1] - part[i]))
         return conj
             
-  
-
-def NrParts(N,S): # Find the number of partition for a given total N and number of parts S
-    # Recoded (originally on 24-Apr-2013) and modified from GAP source code:
-    # http://www.gap-system.org/
+def NrParts(Q,N):
+    """ Find the number of partition for a given total Q and number of parts N. Recoded
+        (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org """
     
-    s=0
-    if N == S or S == 1:
-        s = 1
-    elif N < S or S == 0:
-        s = 0
+    parts=0
+    if Q == N or N == 1:
+        parts = 1
+    elif Q < N or N == 0:
+        parts = 0
     else:
-        n = int(N)
-        k = int(S)
-        p = [1]*n
+        q = int(Q)
+        k = int(N)
+        p = [1]*q
         
         for i in range(2,k+1):  
-            for m  in range(i+1,n-i+1+1):
+            for m  in range(i+1,q-i+1+1):
                 p[m] = p[m] + p[m-i]
             
-        s = p[n-k+1]
+        parts = p[q-k+1]
+    return parts;
 
-    return s;
 
-  
-def rand_parts1(N,S,sample_size): # Generate a uniform random partition of n having s parts.
-    
-    D = {}
-    def P(n,x):
-        if (n,x) not in D:
-            D[(n,x)] = NrParts(n+x,x)
-        return D[(n,x)] # number of partitions of n having x or less as the largest part
-    
+def bottom_up(D,Q,N,sample_size,zeros):
+    """ Generate uniform random partitions of Q having N parts. D is a library that is passed
+    back and forth between functions and frequently updated; it holds values for the number of
+    partitions of Q having N or less parts (or N or less as the largest part), i.e. P(Q,Q+N).
+    zeros is either 'yes' (i.e. summands can have zero values) or 'no' (i.e. summands have only
+    positive values).  """
+        
     parts = []
-    numparts = P(N-S,S)
+    if zeros == 'no':
+        _list = P(D,Q-N,N)
+        D = _list[0]
+        numparts = _list[1]
+        
+    elif zeros == 'yes':
+        _list = P(D,Q,N)
+        D = _list[0]
+        numparts = _list[1]
     
     while len(parts) < sample_size:
-        
-        n = N-S
-        part = [S] # first element of part must equal s (because the conjugate must have s parts)
-        
         which = random.randrange(1,numparts+1)
-    
-        while n:
-            for k in range(1,n+1):
-                count = P(n,k) # number of partitions of N having K or less as the largest part
+        if zeros == 'no':
+            q = int(Q-N)
+            part = [N]
+        elif zeros == 'yes': 
+            q = int(Q)
+            part = []
+            
+        while q:
+            for k in range(1,q+1):
+                _list = P(D,q,k) # number of partitions of q having k or less as the largest part
+                D = _list[0]
+                count = _list[1]
+                
                 if count >= which:
-                    count = P(n,k-1)
+                    _list = P(D,q,k-1)
+                    D = _list[0]
+                    count = _list[1]
                     break
             
             part.append(k)
-            n -= k
-            if n == 0: break
+            q -= k
+            if q == 0: break
             which -= count
         
         part = conjugate(part)
+        if zeros == 'yes':
+            Zs = [0]*(N - len(part))
+            part.extend(Zs)
         parts.append(part)
+    
     return parts
 
       
-def rand_parts2(N,S,sample_size): # Generate a uniform random partition of n having k parts.
-    
-    D = {}
-    def P(n,x):
-        if (n,x) not in D:
-            D[(n,x)] = NrParts(n+x,x)
-        return D[(n,x)] # number of partitions of n with s parts having x or less as the largest part
-    
+def divide_and_conquer(D,Q,N,sample_size,zeros):
+    """ Generate uniform random partitions of Q having N parts. D is a library that is passed,
+        which holds values for the number of partitions of Q having N or less parts (or N or
+        less as the largest part), i.e. P(Q,Q+N). zeros is either 'yes' (i.e. summands can have
+        zero values) or 'no' (i.e. summands only have positive values). """
+   
     parts = []
-    numparts = P(N-S,S)
-    
-    while len(parts) < sample_size:
-    
-        which = random.randrange(1,numparts+1)
-        n = int(N-S)
-        part = [S]
-        _max = int(S)
-        _min = int(1)
+    if zeros == 'no':
+        _list = P(D,Q-N,N)
+        D = _list[0]
+        numparts = _list[1]
         
-        while n > 0:
+    elif zeros == 'yes':
+        _list = P(D,Q,N)
+        D = _list[0]
+        numparts = _list[1]
+    
+    while len(parts) < sample_size:    
+        _max = int(N)
+        _min = int(1)
+        which = random.randrange(1,numparts+1)
+        
+        if zeros == 'no':
+            q = int(Q-N)
+            part = [N]
+        elif zeros == 'yes': 
+            q = int(Q)
+            part = []
+        
+        while q > 0:
             k = random.randrange(_min, _max + 1)
-            upper = int(P(n,k))
-            lower = int(P(n,k-1))
+            _list = P(D,q,k)
+            D = _list[0]
+            upper = _list[1]
+            
+            _list = P(D,q,k-1)
+            D = _list[0]
+            lower = _list[1]
             if lower < which and which <= upper: 
                 part.append(k)
-                n -= k
+                q -= k
                 _max = k
                 _min = 1
                 num = int(upper - lower)
@@ -141,161 +180,96 @@ def rand_parts2(N,S,sample_size): # Generate a uniform random partition of n hav
                 _max = k-1            
             
         part = conjugate(part)
+        if zeros == 'yes':
+            Zs = [0]*(N - len(part))
+            part.extend(Zs)
         parts.append(part)
     
     return parts
+
+
+def rand_parts(Q,N,sample_size,which,zeros):
+    """ Generate uniform random partitions of Q having N parts. """
     
-def rand_parts_zero1(N,S,sample_size):
-    """ Generate a uniform random partition of n having s parts, where some parts
-    may have zero values """
-    
-    D = {}
-    def P(n,x):
-        if (n,x) not in D:
-            D[(n,x)] = NrParts(n+x,x)
-        return D[(n,x)] # number of partitions of n with s parts having x or less as the largest part
-    
-    parts = []
-    numparts = P(N,S)
-    
-    while len(parts) < sample_size:
-        
-        n = int(N)
-        part = []
-        which = random.randrange(1,numparts+1)
-        
-        while n:
-            for k in range(1,n+1):
-                count = P(n,k) # number of partitions of N having K or less as the largest part
-                if count >= which:
-                    count = P(n,k-1)
-                    break
-            
-            part.append(k)
-            n -= k
-            if n == 0: break
-            which -= count
-        
-        part = conjugate(part)
-        _len = len(part)
-        if _len < S:
-            zeros = [0]*(S-_len)
-            part.extend(zeros)
-        parts.append(part)
-    
+    D = {} 
+    if which == 'divide_and_conquer': parts = divide_and_conquer(D,Q,N,sample_size,zeros)
+    if which == 'bottom_up':          parts = bottom_up(D,Q,N,sample_size,zeros)
+    if which == 'best':
+        if Q < 250 or N >= Q/1.5:
+            parts = bottom_up(D,Q,N,sample_size,zeros)
+        else:
+            parts = divide_and_conquer(D,Q,N,sample_size,zeros)  
+                   
     return parts
-      
-def rand_parts_zero2(N,S,sample_size): # Generate a uniform random partition of n having k parts.
-    
-    D = {}
-    def P(n,x):
-        if (n,x) not in D:
-            D[(n,x)] = NrParts(n+x,x)
-        return D[(n,x)] # number of partitions of n with s parts having x or less as the largest part
-    
-    parts = []
-    numparts = P(N,S)
-    
-    while len(parts) < sample_size:
-    
-        n = int(N)
-        part = []
-        which = random.randrange(1,numparts+1)
-        _max = int(S)
-        _min = int(1)
+
+
         
-        while n > 0:
-            k = random.randrange(_min, _max + 1)
-            upper = int(P(n,k))
-            lower = int(P(n,k-1))
-            if lower < which and which <= upper: 
-                part.append(k)
-                n -= k
-                _max = k
-                _min = 1
-                num = int(upper - lower)
-                which = random.randrange(1, num + 1)
-                
-            elif which > upper:
-                _min = k+1    
-            elif which <= lower:
-                _max = k-1        
-            
-        part = conjugate(part)
-        _len = len(part)
-        if _len < S:
-            zeros = [0]*(S-_len)
-            part.extend(zeros)
-        parts.append(part)
+def most_even_partition(Q,N):
+    """ Find the last lexical (i.e. most even) partition of Q having N parts """
     
-    return parts
-    
-        
-def most_even_partition(n,s): # Find the last lexical (i.e. most even) partition of N having S parts
-    
-    most_even = [int(math.floor(float(n)/float(s)))]*s
-    _remainder = int(n%s)
+    most_even = [int(math.floor(float(Q)/float(N)))]*N
+    _remainder = int(Q%N)
     
     j = 0
     while _remainder > 0:
         most_even[j] += 1
         _remainder -= 1
         j += 1
+    
     return most_even
 
 
-
-def min_max(n,s): # Find the smallest possible maximum part a partition of N having S parts
-
-    _min = int(math.floor(float(n)/float(s)))
-    if int(n%s) > 0:
+def min_max(Q,N):
+    """ Find the smallest possible maximum part a partition of Q having N parts """
+    
+    _min = int(math.floor(float(Q)/float(N)))
+    if int(Q%N) > 0:
         _min +=1
-
+    
     return _min
+
     
-    
-def firstpart(N,S,k): # Find the first lexical partition of N having S parts with k as the largest part
+def firstpart(Q,N,k):
+    """ Find the first lexical partition of Q having N parts with k as the largest part """
     
     part = []
     if k == None:
-        part.append(N-S+1)
-        ones = [1]*(S-1)
+        part.append(Q-N+1)
+        ones = [1]*(N-1)
         part.extend(ones)
         return part
     
-    if k < min_max(N,S):
+    elif k < min_max(Q,N):
         return None
         
     else:
         part.append(k)
-        N -= k
-        S -= 1
-        while N > 0:
-            k = min(k,N-S+1)
+        Q -= k
+        N -= 1
+        while Q > 0:
+            k = min(k,Q-N+1)
             part.append(k)
-            N -= k
-            S -= 1
+            Q -= k
+            N -= 1
         
     return part
-       
-    
-# The 2 functions below find the next lexical partition of N having S parts
+
 
 def next_restricted_part(p):
-    n = sum(p)
-    s = len(p)
-    if p == most_even_partition(n,s):
-        return firstpart(n,s,None)
+    """ Find the next lexical partition of Q having N parts """
+    Q = sum(p)
+    N = len(p)
+    if p == most_even_partition(Q,N):
+        return firstpart(Q,N,None)
 
     for i in enumerate(reversed(p)):
         if i[1] - p[-1] > 1:
-            if i[0] == (s-1):
-                p = firstpart(n,s,int(i[1]-1))
+            if i[0] == (N-1):
+                p = firstpart(Q,N,int(i[1]-1))
                 return p
             else:
-                parts = np.split(p,[s-i[0]-1])
+                parts = np.split(p,[N-i[0]-1])
                 h1 = list(parts[0])
                 h2 = list(parts[1])
                 next = list(firstpart(int(sum(h2)),int(len(h2)),int(h2[0])-1))
                 return h1+next
-                
