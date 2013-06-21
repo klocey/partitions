@@ -4,7 +4,7 @@ partitions--Code for integer partitioning
 Files
 -----
 
-misc_part_func.py --contains the primary functions.
+partitions.py --contains the primary partitioning functions.
 
 rand_part_kdens.py --used to reveal that the functions are unbiased.
 
