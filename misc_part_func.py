@@ -53,25 +53,47 @@ def conjugate(part):
             conj.extend([i]*(part[i-1] - part[i]))
         return conj
             
-def NrParts(Q,N):
+def NrParts(*arg):
     """ Find the number of partition for a given total Q and number of parts N. Recoded
         (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org """
     
-    parts=0
-    if Q == N or N == 1:
-        parts = 1
-    elif Q < N or N == 0:
-        parts = 0
-    else:
-        q = int(Q)
-        k = int(N)
-        p = [1]*q
-        
-        for i in range(2,k+1):  
-            for m  in range(i+1,q-i+1+1):
-                p[m] = p[m] + p[m-i]
+    parts = 0
+    if len(arg) == 1:
+        Q = arg[0]
+        parts = 1                             # p(0) = 1
+        p = [1]*(Q+1)
+        for i in range(1,Q+1):
+            parts = 0
+            k = 1
+            l = 1                         # k*(3*k-1)/2
+            while 0 <= i-(l+k):
+                parts = parts - (-1)**k * (p[i-l] + p[i-(l+k)])
+                k = k + 1
+                l = l + 3*k - 2
             
-        parts = p[q-k+1]
+            if 0 <= i-l:
+                parts = parts - (-1)**k * p[i-l]
+            p[i] = parts
+    
+    elif len(arg) == 2:    
+        Q = arg[0]
+        N = arg[1]
+        parts=0
+        if Q == N or N == 1:
+            parts = 1
+        elif Q < N or N == 0:
+            parts = 0
+        else:
+            q = int(Q)
+            k = int(N)
+            p = [1]*q
+        
+            for i in range(2,k+1):  
+                for m  in range(i+1,q-i+1+1):
+                    p[m] = p[m] + p[m-i]
+            
+            parts = p[q-k+1]
+    
     return parts;
 
 
