@@ -55,7 +55,11 @@ def conjugate(part):
             
 def NrParts(*arg):
     """ Find the number of partition for a given total Q and number of parts N. Recoded
-        (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org """
+        (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org
+        
+        Note: p(Q) = p(Q+Q,Q) ...so NrParts(Q) returns the same value as NrParts(Q+Q,Q)
+        ...wish I would've realized that before translating the block below 'if len(arg)==1:'
+        from GAP source code. Well, now there's two waybotts to get p(Q). """
     
     parts = 0
     if len(arg) == 1:
