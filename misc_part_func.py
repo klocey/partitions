@@ -59,7 +59,7 @@ def NrParts(*arg):
         
         Note: p(Q) = p(Q+Q,Q) ...so NrParts(Q) returns the same value as NrParts(Q+Q,Q)
         ...wish I would've realized that before translating the block below 'if len(arg)==1:'
-        from GAP source code. Well, now there's two waybotts to get p(Q). """
+        from GAP source code. Well, now there's two ways to get p(Q). """
     
     parts = 0
     if len(arg) == 1:
