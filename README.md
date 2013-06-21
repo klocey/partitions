@@ -1,8 +1,8 @@
 partitions--Code for integer partitioning
 =========================================
 
-Files
------
+Files & Folders
+---------------
 
 partitions.py --contains the primary partitioning functions.
 
@@ -11,11 +11,9 @@ rand_part_kdens.py --used to reveal that the functions are unbiased.
 random_part_time2.py --makes time comparisons between random partitioning functions.
 
 random_part_time_simple.py --used to find the number of seconds for generating a random partition for a
-particular Q-N combination.
+particular Q-N combination. prints time to screen.
 
-restricted_partitions.py --contains miscellaneous partitioning functions.
-
-find_dist.py --misc. partitioning code in limbo.
+metrics --folder containing files for evenness, diversity, inequality metrics...more to come.
 
 
 
