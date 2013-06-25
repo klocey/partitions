@@ -1,7 +1,9 @@
-#!/usr/bin/env sage -python
+#!/usr/bin/python
+
+##!/usr/bin/env sage -python # uncomment if using the Sage environment
 
 import sys
-sys.path.append("/home/kenlocey/modules/partitions")
+sys.path.append("/home/kenlocey/partitions")
 import partitions as parts
 import re
 import time
@@ -24,11 +26,18 @@ def rand_part_Sage(N,S,sample_size):
     
     return parts
     
-N = 1000
-S = 100
-sample_size = 1
+Q = 100
+N = 10
+zeros = 'no'
+sample_size = 100
+print '\nQ =',Q,' N =',N,' Sample size =',sample_size
 
-with Timer() as t:
-    x = parts.rand_parts2(N,S,sample_size)
-t1 = t.interval    
-print 'N:',N,'S:',S,'sample size:',sample_size,'time:',t1,'seconds'
+witches = ['multiplicity','top_down','divide_and_conquer','bottom_up']
+print_statements = ['\nMultiplicity:','Top down:','Divide and conquer:','Bottom up:']
+
+for i, x in enumerate(witches):
+    with Timer() as t:
+        which = witches[i]
+        partitions = parts.rand_parts(Q,N,sample_size,which,zeros)
+    t1 = t.interval   
+    print print_statements[i],t1,'seconds'
