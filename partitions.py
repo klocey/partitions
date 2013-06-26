@@ -76,15 +76,13 @@ def NrParts(*arg):
     elif Q < N or N == 0:
         parts = 0
     else:
-        q = int(Q)
-        k = int(N)
-        p = [1]*q
+        p = [1]*Q
         
-        for i in range(2,k+1):  
-            for m  in range(i+1,q-i+1+1):
+        for i in range(2,N+1):  
+            for m  in range(i+1,Q-i+1+1):
                 p[m] = p[m] + p[m-i]
             
-        parts = p[q-k+1]
+        parts = p[Q-N+1]
     
     return parts;
 
