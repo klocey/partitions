@@ -4,7 +4,6 @@ from sage.all import *
 import sys
 sys.path.append("/home/kenlocey/metrics")
 import metrics
-#sys.path.append("/home/kenlocey/modules/partitions")
 import partitions as parts
 import os
 from os import path, access, R_OK  # W_OK for write permission
