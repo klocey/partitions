@@ -12,7 +12,8 @@ import itertools
 """ Functions for integer partitioning. Most apply to using integer partitioning to examine distributions
     of wealth and abundance using the feasible set. The feasible set is the set all forms of the distribution
     having the same constraint values (e.g. total abundance N, species richness S). To my knowledge, no
-    mathematical environments provide the last 4 functions listed below.
+    mathematical environments provide the last 9 functions listed below, i.e. only the first two were recoded from
+    existing softwares.
 
 Included functions (not an exhaustive list, yet):
 
