@@ -3,7 +3,6 @@
 ##!/usr/bin/env sage -python # uncomment if using the Sage environment
 
 import sys
-sys.path.append("/home/kenlocey/partitions")
 import partitions as parts
 import re
 import time
@@ -26,10 +25,10 @@ def rand_part_Sage(N,S,sample_size):
     
     return parts
     
-Q = 100
-N = 10
+Q = 10000
+N = 100
 zeros = 'no'
-sample_size = 100
+sample_size = 1
 print '\nQ =',Q,' N =',N,' Sample size =',sample_size
 
 witches = ['multiplicity','top_down','divide_and_conquer','bottom_up']
