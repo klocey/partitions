@@ -20,7 +20,7 @@ Included functions (not an exhaustive list, yet):
 - conjugate(): get the conjugate of an integer partition (recoded from Sage, see below)
 - NrParts(): Find the number of partitions for a given total N and number of parts S (modified and recoded from GAP, see below)
 
-Three functions to generate uniform random integer partitions of Q having N parts.
+Five functions to generate uniform random integer partitions of Q having N parts.
 Each allows the option to have summands with zero values
 - bottom_up(): Starts at smallest possible value of the largest possible part (K) 
 - divide_and_conquer(): Start at random points in the feasible set
