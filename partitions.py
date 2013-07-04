@@ -9,43 +9,60 @@ import re
 import math
 import itertools
 
-""" Functions for integer partitioning. Most apply to using integer partitioning to examine distributions
-    of wealth and abundance using the feasible set. The feasible set is the set all forms of the distribution
-    having the same constraint values (e.g. total abundance N, species richness S). To my knowledge, no
-    mathematical environments provide the last 9 functions listed below, i.e. only the first two were recoded from
-    existing softwares.
+""" 
+    Functions for integer partitioning. Most apply to using integer partitioning
+    to examine distributions of wealth and abundance using the feasible set. The
+    feasible set is the set all forms of the distribution having the same
+    constraint values (e.g. total abundance N, species richness S).
+    
+    Included functions:
+    - conjugate(): get the conjugate of an integer partition (recoded from Sage,
+      see below)
+    - NrParts(): Find the number of partitions for a given total N and number of
+      parts S (modified and recoded from GAP, see below)
+    
+    Five functions to generate uniform random integer partitions of Q having N
+    parts.  Each allows the option to have summands with zero values.
+    - bottom_up(): Starts at smallest possible value of the largest possible
+      part (K) 
+    - divide_and_conquer(): Start at random points in the feasible set
+    - top_down(): Starts at largest possible value of the largest possible part
+      (K) 
+    - multiplicity(): uses the top_down approach but builds the partition using
+      multiplicities (i.e. multiples of parts)
+    - best(): Calls one of the above functions depending on the value of Q and
+      Q/N (restricted to bottom_up and divide_and_conquer for now)
 
-Included functions (not an exhaustive list, yet):
-
-- conjugate(): get the conjugate of an integer partition (recoded from Sage, see below)
-- NrParts(): Find the number of partitions for a given total N and number of parts S (modified and recoded from GAP, see below)
-
-Five functions to generate uniform random integer partitions of Q having N parts.
-Each allows the option to have summands with zero values
-- bottom_up(): Starts at smallest possible value of the largest possible part (K) 
-- divide_and_conquer(): Start at random points in the feasible set
-- top_down(): Starts at largest possible value of the largest possible part (K) 
-- multiplicity(): uses the top_down approach but builds the partition using multiplicities (i.e. multiples of parts)
-- best(): Calls one of the above functions depending on the value of Q and Q/N (restricted to bottom_up and divide_and_conquer for now)
-
-Four partitioning functions not provided in other softwares
-- most_even_partition(): Get the last lexical (i.e. most even) partition of Q having N parts (no zeros)
-- min_max(): Get the smallest possible maximum part a partition of Q having N parts (no zeros)
-- firstpart(): Get the first lexical partition of Q having N parts with k as the largest part (no zeros)
-- next_restricted_part(): Get the next lexical partition of Q having N parts """
+    Four partitioning functions not provided in other softwares
+    - most_even_partition(): Get the last lexical (i.e. most even) partition of
+      Q having N parts (no zeros)
+    - min_max(): Get the smallest possible maximum part a partition of Q having
+      N parts (no zeros)
+    - firstpart(): Get the first lexical partition of Q having N parts with k as
+      the largest part (no zeros)
+    - next_restricted_part(): Get the next lexical partition of Q having N parts
+"""
 
 
 def P(D,q,k):
-    """ number of partitions of q with k or less parts (or having k or less as the largest part),
-        i.e. P(q+k,k). D is a dictionary of P(q+k,k) values. """
-        
+    """
+    number of partitions of q with k or less parts (or having k or less as the largest
+    part), i.e. P(q+k,k).
+    Arguments:
+        D : lookup table for numbers of partitions, P(q+k,k) values. 
+        q : total sum of the set
+        k : number of parts      
+    """
+    
     if (q,k) not in D:
         D[(q,k)] = NrParts(q+k,k)
     return [D, D[(q,k)]] # return the updated dictionary and P(q+k,k).
 
 def conjugate(part):
-    """ Find the conjugate of an integer partition. Recoded (on 24-Apr-2013)
-        from the Sage source code: www.sagenb.org/src/combinat/partition.py """
+    """
+    Find the conjugate of an integer partition. Recoded (on 24-Apr-2013) from the Sage
+    source code: www.sagenb.org/src/combinat/partition.py
+    """
     
     if part == []:
         return []
@@ -57,11 +74,14 @@ def conjugate(part):
         return conj
             
 def NrParts(*arg):
-    """ Find the number of partition for a given total Q and number of parts N. Recoded
-        (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org
-        
-        Note: p(Q) = p(Q+Q,Q) ...so NrParts(Q) returns the same value as NrParts(Q+Q,Q) """
-        
+    """
+    Find the number of partition for a given total Q and number of parts N. Recoded
+    on 24-Apr-2013 and modified from GAP source code: www.gap-system.org
+    Note: p(Q) = p(Q+Q,Q) ...so NrParts(Q) returns the same value as NrParts(Q+Q,Q)
+    Arguments:
+    *arg : either a list of just Q or a list of Q and N
+    """
+
     parts = 0
     if len(arg) == 1:  # using p(Q) = p(Q+Q,Q)
         Q = arg[0]*2
@@ -90,11 +110,15 @@ def NrParts(*arg):
 
 
 def bottom_up(D,Q,N,sample_size,zeros):
-    """ Generate uniform random partitions of Q having N parts. D is a library that is passed
-    back and forth between functions and frequently updated; it holds values for the number of
-    partitions of Q having N or less parts (or N or less as the largest part), i.e. P(Q,Q+N).
-    zeros is either 'yes' (i.e. summands can have zero values) or 'no' (i.e. summands have only
-    positive values).  """
+    """
+    Bottom up method of generating uniform random partitions of Q having N parts.
+    Arguments:
+        D : a dictionary for the number of partitions of Q having N or less parts (or N or less as the largest part), i.e. P(Q,Q+N).
+        Q : Total sum across parts
+        N : Number of parts to sum over
+        sample_size : number of random partitions to generate
+        zeros : (yes/no) if 'yes' summands can have zero values, if 'no' summands have only positive values
+    """
         
     parts = []
     if zeros == 'no':
