@@ -1,22 +1,32 @@
-## Functions for integer partitioning. Most apply to using integer partitioning to examine distributions
-# of wealth and abundance using the feasible set. The feasible set is the set all forms of the distribution
-# having the same constraint values (e.g. total abundance N, species richness S). To my knowledge, no
-# mathematical environments have functions 3 through 10.
+# Functions for integer partitioning. Most apply to using integer partitioning
+# to examine distributions of wealth and abundance using the feasible set. The
+# feasible set is the set all forms of the distribution having the same
+# constraint values (e.g. total abundance N, species richness S). To my
+# knowledge, no mathematical environments provide the last 4 functions listed
+# below.
 # 
 # Included functions:
 # 
-# 1. conjugate(): get the conjugate of an integer partition (recoded from Sage, see below)
-# 2. NrParts(): Find the number of partitions for a given total N and number of parts S (modified and recoded from GAP, see below)
+# - conjugate(): get the conjugate of an integer partition (recoded from Sage,
+# see below) 
+# - NrParts(): Find the number of partitions for a given total N and
+# number of parts S (modified and recoded from GAP, see below)
 # 
-# 3. rand_parts1(): Generate uniform random integer partitions of n having s parts. Starts at small end of the feasible set. 
-# 4. rand_parts2(): Generate uniform random integer partitions of n having s parts. Starts at random points in the feasible set.
+# Three functions to generate uniform random integer partitions of Q having N
+# parts. Each allows the option to have summands with zero values 
+# - bottom_up(): Starts at small end of the feasible set
+# - divide_and_conquer(): Start at random points in the feasible set
+# - best(): Calls one of the above two functions depending on the value of Q and Q/N
 # 
-# 5. rand_parts_zero1(): Generate uniform random partitions of n having s parts, where some parts may = 0. Starts at small end of the feasible set.
-# 6. rand_parts_zero2(): Generate uniform random partitions of n having s parts, where some parts may = 0. Starts at random points in the feasible set.
-# 
-# 7. rand_parts(): Generate uniform random partitions of n having s parts,
-#      can generate those with our without zeros, can start at small end or
-#      random points in fessible set
+# Four partitioning functions not provided in other softwares -
+# most_even_partition(): Get the last lexical (i.e. most even) partition of Q
+# having N parts (no zeros) 
+# - min_max(): Get the smallest possible maximum part
+# a partition of Q having N parts (no zeros) 
+# - firstpart(): Get the first lexical partition of Q having N parts with k as
+# the largest part (no zeros) 
+# - next_restricted_part(): Get the next lexical partition of Q having N parts
+##
 
 dyn.load("partitions.dll")
 
@@ -28,6 +38,20 @@ rand_int = function( min=0, max=1) {
 }
 
 last = function(x) { tail(x, n = 1) }
+
+P = function(D, q, k, use_c) {
+  # number of partitions of q with k or less parts (or having k or less as the
+  # largest part), i.e. P(q+k,k).
+  # Arguments:
+  #   D : lookup table for numbers of partitions, P(q+k,k) values. 
+  #   q : total sum of the set
+  #   k : number of parts
+  #   use_c : logical, if TRUE the number of partitions is computed in c
+  key = paste(q, k, sep=',')
+  if (!has.key(key, D))
+    D[key] = NrParts(q + k, k, use_c)
+  return(list(D, D[[key]]))
+}
 
 conjugate = function(part, use_c=TRUE){ 
   # Find the conjugate of an integer partition
@@ -56,40 +80,55 @@ conjugate = function(part, use_c=TRUE){
   return(conj)
 }
 
-NrParts = function(N, S, use_c = TRUE){ 
-  # Find the number of partition for a given total N and number of parts S
-  # Recoded (originally on 24-Apr-2013) and modified from GAP source code:
-  # http://www.gap-system.org/
+NrParts = function(Q, N, use_c = TRUE){ 
+  # Find the number of partition for a given total Q and number of parts N.
+  # Recoded (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org
   # Arguments:
-  # N : Total number of individuals
-  # S : Total number of species
-  # use_c : default is TRUE, the number of partitions is computed in c  
-  s = 0
-  if (N == S | S == 1) {
-    s = 1
+  #   Q : Total sum
+  #   N : Number of items to sum across
+  #   use_c : default is TRUE, the number of partitions is computed in c  
+  parts = 0
+  if (Q == N | N == 1) {
+    parts = 1
   }
-  else if (N < S | S == 0) {
-      s = 0
+  else if (Q < N | N == 0) {
+    parts = 0
   }
   else {
-    n = N
-    k = S
-    p = rep(1, n)
+    q = Q
+    k = N
+    p = rep(1, q)
     if (use_c) {
-      p = .C("NrParts", n = as.integer(n), k = as.integer(k), p = as.double(p))$p
+      p = .C("NrParts", q = as.integer(q), k = as.integer(k), p = as.double(p))$p
     }
     else {
       for (i in 2:k) {
-        if ((i + 1) <= (n - i + 1)) {
-          for (m in (i + 1):(n - i + 1)) {
+        if ((i + 1) <= (q - i + 1)) {
+          for (m in (i + 1):(q - i + 1)) {
             p[m + 1] = p[m + 1] + p[m - i + 1]
           }
         }
       }  
     }  
-    s = p[n - k + 2]
+    parts = p[q - k + 2]
   }  
-  return(s)
+  return(parts)
+}
+
+bottom_up = function(D, Q, N, sample_size, zeros) {
+  # Bottom up algo for generating uniform random partitions of Q having N parts.
+  # Arguments:
+  #   D: a dictionary for the number of partitions of Q having N or less parts
+  #     (or N or less as the largest part), i.e. P(Q,Q+N).
+  #   Q : Total sum across parts
+  #   N : Number of parts to sum over
+  #   sample_size : number of random partitions to generate
+  #   zeros: boolean if TRUE summands can have zero values, if FALSE summands
+  #     have only positive values
+  parts = NULL
+  if (!zeros) {
+        
+  }
 }
 
 rand_parts1 = function(N, S, sample_size, use_dict=FALSE, use_c=TRUE) { 
