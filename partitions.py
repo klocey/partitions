@@ -9,6 +9,7 @@ import re
 import math
 import itertools
 
+
 """ 
     Functions for integer partitioning. Most apply to using integer partitioning
     to examine distributions of wealth and abundance using the feasible set. The
@@ -63,6 +64,7 @@ def conjugate(part):
     """
     Find the conjugate of an integer partition. Recoded (on 24-Apr-2013) from
     the Sage source code: www.sagenb.org/src/combinat/partition.py
+    
     """
     
     if part == []:
@@ -78,11 +80,12 @@ def NrParts(*arg):
     """
     Find the number of partition for a given total Q and number of parts N.
     Recoded on 24-Apr-2013 and modified from GAP source code: www.gap-system.org
-    Note: p(Q) = p(Q + Q, Q) ...so NrParts(Q) returns the same value as NrParts
+    Note: p(Q) = p(Q + Q, Q) thus NrParts(Q) returns the same value as NrParts
     (Q + Q, Q)
     
     Arguments:
-    *arg : either a list of just Q or a list of Q and N
+    *arg : either Q or Q and N
+    
     """
 
     parts = 0
@@ -112,38 +115,39 @@ def NrParts(*arg):
 
 
 
-def bottom_up(D, Q, N, sample_size, zeros):
+def bottom_up(Q, N, sample_size, D={}, zeros=False):
     """
     Bottom up method of generating uniform random partitions of Q having N parts.
     
     Arguments:
-        D : a dictionary for the number of partitions of Q having N or less parts (or N or less as the largest part), i.e. P(Q, Q + N).
         Q : Total sum across parts
         N : Number of parts to sum over
         sample_size : number of random partitions to generate
-        zeros : (yes/no) if 'yes' summands can have zero values, if 'no' summands have only positive values
+        D : a dictionary for the number of partitions of Q having N or less
+            parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+        zeros : boolean if True summands can have zero values, if False
+                summands have only positive values
     
-    """        
+    """
     parts = []
-    if zeros == 'no':
-        _list = P(D, Q - N, N)
-        D = _list[0]
-        numparts = _list[1]
-        
-    elif zeros == 'yes':
+    if zeros:
         _list = P(D, Q, N)
         D = _list[0]
-        numparts = _list[1]
+        numparts = _list[1]        
+    else:
+        _list = P(D, Q - N, N)
+        D = _list[0]
+        numparts = _list[1]        
     
     while len(parts) < sample_size:
         which = random.randrange(1, numparts + 1)
-        if zeros == 'no':
-            q = int(Q - N)
-            part = [N]
-        elif zeros == 'yes': 
+        if zeros:
             q = int(Q)
             part = []
-            
+        else:
+            q = int(Q - N)
+            part = [N]
+        
         while q:
             for k in range(1, q + 1):
                 _list = P(D, q, k) # number of partitions of q having k or less as the largest part
@@ -162,7 +166,7 @@ def bottom_up(D, Q, N, sample_size, zeros):
             which -= count
         
         part = conjugate(part)
-        if zeros == 'yes':
+        if zeros:
             Zs = [0] * (N - len(part))
             part.extend(Zs)
         parts.append(part)
@@ -172,8 +176,8 @@ def bottom_up(D, Q, N, sample_size, zeros):
 
 def top_down(D, Q, N, sample_size, zeros):
     """
-    Generate uniform random partitions of Q having N parts. D is a library that is passed
-    back and forth between functions and frequently updated; it holds values for the number of
+    Generate uniform random partitions of Q having N parts. D is a library that
+    is passed back and forth between functions and frequently updated; it holds values for the number of
     partitions of Q having N or less parts (or N or less as the largest part), i.e. P(Q, Q + N).
     zeros is either 'yes' (i.e. summands can have zero values) or 'no' (i.e. summands have only
     positive values).
@@ -354,7 +358,7 @@ def multiplicity(D, Q, N, sample_size, zeros):
                     q=0
                     break
                 if count < which: # k has been found
-                    k + =1
+                    k += 1
                     _list = get_multiplicity(D, which, q, k, count) # now, find how many times k occurs, i.e. the multiplicity of k
                     multi = _list[0]
                     count = _list[1]
