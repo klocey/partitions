@@ -23,7 +23,7 @@ import itertools
       parts S (modified and recoded from GAP, see below)
     
     Five functions to generate uniform random integer partitions of Q having N
-    parts.  Each allows the option to have summands with zero values.
+    parts.  Each allows the option to have partitions with zero values.
     - bottom_up(): Starts at smallest possible value of the largest possible
       part (K) 
     - divide_and_conquer(): Start at random points in the feasible set
@@ -32,7 +32,7 @@ import itertools
     - multiplicity(): uses the top_down approach but builds the partition using
       multiplicities (i.e. multiples of parts)
     - best(): Calls one of the above functions depending on the value of Q and
-      Q/N (restricted to bottom_up and divide_and_conquer for now)
+      Q / N (restricted to bottom_up and divide_and_conquer for now)
 
     Four partitioning functions not provided in other softwares
     - most_even_partition(): Get the last lexical (i.e. most even) partition of
@@ -60,6 +60,7 @@ def P(D, q, k):
         D[(q, k)] = NrParts(q + k, k)
     return [D, D[(q, k)]] # return the updated dictionary and P(q + k, k).
 
+
 def conjugate(part):
     """
     Find the conjugate of an integer partition. Recoded (on 24-Apr-2013) from
@@ -75,7 +76,8 @@ def conjugate(part):
         for i in xrange(l - 1, 0, -1):
             conj.extend([i] * (part[i - 1] - part[i]))
         return conj
-            
+
+
 def NrParts(*arg):
     """
     Find the number of partition for a given total Q and number of parts N.
@@ -88,31 +90,24 @@ def NrParts(*arg):
     
     """
 
-    parts = 0
     if len(arg) == 1:  # using p(Q) = p(Q + Q, Q)
         Q = arg[0] * 2
         N = arg[0]
-    
     elif len(arg) == 2:    
         Q = arg[0]
         N = arg[1]
-    
-    parts=0
+    parts = 0
     if Q == N or N == 1:
         parts = 1
     elif Q < N or N == 0:
         parts = 0
     else:
         p = [1] * Q
-        
         for i in range(2, N + 1):  
             for m  in range(i + 1, Q - i + 1 + 1):
                 p[m] = p[m] + p[m - i]
-            
         parts = p[Q - N + 1]
-    
-    return parts;
-
+    return parts
 
 
 def bottom_up(Q, N, sample_size, D={}, zeros=False):
@@ -125,20 +120,17 @@ def bottom_up(Q, N, sample_size, D={}, zeros=False):
         sample_size : number of random partitions to generate
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        zeros : boolean if True summands can have zero values, if False
-                summands have only positive values
+        zeros : boolean if True partitions can have zero values, if False
+                partitions have only positive values
     
     """
     parts = []
     if zeros:
-        _list = P(D, Q, N)
-        D = _list[0]
-        numparts = _list[1]        
+        _list = P(D, Q, N)    
     else:
         _list = P(D, Q - N, N)
-        D = _list[0]
-        numparts = _list[1]        
-    
+    D = _list[0]
+    numparts = _list[1]        
     while len(parts) < sample_size:
         which = random.randrange(1, numparts + 1)
         if zeros:
@@ -147,66 +139,63 @@ def bottom_up(Q, N, sample_size, D={}, zeros=False):
         else:
             q = int(Q - N)
             part = [N]
-        
-        while q:
+        while q > 0:
             for k in range(1, q + 1):
                 _list = P(D, q, k) # number of partitions of q having k or less as the largest part
                 D = _list[0]
                 count = _list[1]
-                
                 if count >= which:
                     _list = P(D, q, k - 1)
                     D = _list[0]
                     count = _list[1]
                     break
-            
             part.append(k)
             q -= k
-            if q == 0: break
+            if q == 0:
+                break
             which -= count
-        
         part = conjugate(part)
         if zeros:
             Zs = [0] * (N - len(part))
             part.extend(Zs)
         parts.append(part)
-    
     return parts
 
 
-def top_down(D, Q, N, sample_size, zeros):
+def top_down(Q, N, sample_size, D={}, zeros=False):
     """
-    Generate uniform random partitions of Q having N parts. D is a library that
-    is passed back and forth between functions and frequently updated; it holds values for the number of
-    partitions of Q having N or less parts (or N or less as the largest part), i.e. P(Q, Q + N).
-    zeros is either 'yes' (i.e. summands can have zero values) or 'no' (i.e. summands have only
-    positive values).
-
-    """        
+    Top down method of generating uniform random partitions of Q having N parts.
+    
+    Arguments:
+        Q : Total sum across parts
+        N : Number of parts to sum over
+        sample_size : number of random partitions to generate
+        D : a dictionary for the number of partitions of Q having N or less
+            parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+        zeros : boolean if True partitions can have zero values, if False
+                partitions have only positive values
+    
+    """    
     parts = []
-    if zeros == 'no':
-        _list = P(D, Q - N, N)
-        D = _list[0]
-        numparts = _list[1]
-        
-    elif zeros == 'yes':
+    if zeros:
         _list = P(D, Q, N)
-        D = _list[0]
-        numparts = _list[1]
-        
+    else:
+        _list = P(D, Q - N, N)
+    D = _list[0]
+    numparts = _list[1]       
     while len(parts) < sample_size:
         which = random.randrange(1, numparts + 1)
-        if zeros == 'no':
-            q = int(Q - N)
-            part = [N]
-        elif zeros == 'yes': 
+        if zeros:
             q = int(Q)
             part = []
-        
-        while q > 1:
-            if part: x = min(part)
-            else: x = q
-            
+        else:
+            q = int(Q - N)
+            part = [N]            
+        while q > 1:   ## Should this be q > 0 ? DJM
+            if part: 
+                x = min(part)
+            else: 
+                x = q
             for k in reversed(range(1, x + 1)):
                 _list = P(D, q, k) # number of partitions of q having k or less as the largest part
                 D = _list[0]
@@ -214,61 +203,59 @@ def top_down(D, Q, N, sample_size, zeros):
                 if count < which:
                     k += 1
                     break
-            
             which -= count
             part.append(k)
             q -= k
             if q == 1:
                 part.append(1)
                 break
-            if q <= 0: break
-            
+            if q <= 0:
+                break
         part = conjugate(part)
-        if zeros == 'yes':
+        if zeros:
             Zs = [0] * (N - len(part))
             part.extend(Zs)
         parts.append(part)
-        
     return parts
 
 
-
-      
-def divide_and_conquer(D, Q, N, sample_size, zeros):
-    """ Generate uniform random partitions of Q having N parts. D is a library that is passed,
-        which holds values for the number of partitions of Q having N or less parts (or N or
-        less as the largest part), i.e. P(Q, Q + N). zeros is either 'yes' (i.e. summands can have
-        zero values) or 'no' (i.e. summands only have positive values). """
-   
-    parts = []
-    if zeros == 'no':
-        _list = P(D, Q - N, N)
-        D = _list[0]
-        numparts = _list[1]
-        
-    elif zeros == 'yes':
-        _list = P(D, Q, N)
-        D = _list[0]
-        numparts = _list[1]
+def divide_and_conquer(Q, N, sample_size, D={}, zeros=False):
+    """
+    Divide and conquer method of generating uniform random partitions of Q
+    having N parts.
     
+    Arguments:
+        Q : Total sum across parts
+        N : Number of parts to sum over
+        sample_size : number of random partitions to generate
+        D : a dictionary for the number of partitions of Q having N or less
+            parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+        zeros : boolean if True partitions can have zero values, if False
+                partitions have only positive values
+    
+    """
+    parts = []
+    if zeros:
+        _list = P(D, Q, N)
+    else:
+        _list = P(D, Q - N, N)
+    D = _list[0]
+    numparts = _list[1]
     while len(parts) < sample_size:    
-        _max = int(N)
-        _min = int(1)
         which = random.randrange(1, numparts + 1)
-        
-        if zeros == 'no':
-            q = int(Q - N)
-            part = [N]
-        elif zeros == 'yes': 
+        if zeros:
             q = int(Q)
             part = []
-        
+        else:
+            q = int(Q - N)
+            part = [N]
+        _max = int(N)
+        _min = int(1)        
         while q > 0:
             k = random.randrange(_min, _max + 1)
             _list = P(D, q, k)
             D = _list[0]
             upper = _list[1]
-            
             _list = P(D, q, k - 1)
             D = _list[0]
             lower = _list[1]
@@ -279,26 +266,33 @@ def divide_and_conquer(D, Q, N, sample_size, zeros):
                 _min = 1
                 num = int(upper - lower)
                 which = random.randrange(1, num + 1)
-                
             elif which > upper:
                 _min = k + 1    
             elif which <= lower:
-                _max = k - 1            
-            
+                _max = k - 1
         part = conjugate(part)
-        if zeros == 'yes':
+        if zeros:
             Zs = [0] * (N - len(part))
             part.extend(Zs)
         parts.append(part)
-    
     return parts
 
 
-def get_multiplicity(D, which, q, k, count): # count < which
-    """ Find the number of times a value k occurs in a partition that is being
-    generated/built at random by the multiplicity() function. The resulting multiplicity
-    is then passed back to the multiplicity() function along with an updated value of count
-    and an updated library D  """
+def get_multiplicity(D, which, q, k, count): 
+    """ 
+    Find the number of times a value k occurs in a partition that is being
+    generated at random by the multiplicity() function. The resulting
+    multiplicity is then passed back to the multiplicity() function along with
+    an updated value of count and an updated dictionary D
+    
+    Arguments:
+        D : 
+        which :
+        q : 
+        k : 
+        count : count < which
+    
+    """
     
     multi = [] # the multiplicity 
     f = 1
@@ -311,48 +305,49 @@ def get_multiplicity(D, which, q, k, count): # count < which
             multi = [k] * f
             break                
         f += 1
-            
     return [multi, count, D]
 
 
-def multiplicity(D, Q, N, sample_size, zeros):
-    """ Generate uniform random partitions of Q having N parts. D is a library that is passed
-    back and forth between functions and frequently updated; it holds values for the number of
-    partitions of Q having N or less parts (or N or less as the largest part), i.e. P(Q, Q+N).
-    zeros is either 'yes' (i.e. summands can have zero values) or 'no' (i.e. summands have only
-    positive values).  """
+def multiplicity(Q, N, sample_size, D={}, zeros=False):
+    """
+    multiplicity method of generating uniform random partitions of Q having N
+    parts.
+    
+    Arguments:
+        Q : Total sum across parts
+        N : Number of parts to sum over
+        sample_size : number of random partitions to generate
+        D : a dictionary for the number of partitions of Q having N or less
+            parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+        zeros : boolean if True partitions can have zero values, if False
+                partitions have only positive values
+    
+    """
     parts = []
-    if zeros == 'no':
-        _list = P(D, Q - N, N)
-        D = _list[0]
-        numparts = _list[1]
-        
-    elif zeros == 'yes':
+    if zeros:
         _list = P(D, Q, N)
-        D = _list[0]
-        numparts = _list[1]
-        
+    else:
+        _list = P(D, Q - N, N)
+    D = _list[0]
+    numparts = _list[1]
     while len(parts) < sample_size:
         which = random.randrange(1, numparts + 1)
-        if zeros == 'no':
-            q = int(Q - N)
-            part = [N]
-        elif zeros == 'yes': 
+        if zeros:
             q = int(Q)
             part = []
-        
+        else: 
+            q = int(Q - N)
+            part = [N]            
         while q > 0:
-            
             multi = []
-            if part: x = min(part)
-            else: x = int(q)
-            
+            if part:
+                x = min(part)
+            else: 
+                x = int(q)
             for k in reversed(range(1, x + 1)): # start with largest k
-                
                 _list = P(D, q, k) # number of partitions of q having k or less as the largest part
                 D = _list[0]
                 count = _list[1]
-                
                 if count == which and which == 1:
                     multi = [1] * q
                     q=0
@@ -364,61 +359,69 @@ def multiplicity(D, Q, N, sample_size, zeros):
                     count = _list[1]
                     D = _list[2]
                     break
-                    
             q -= sum(multi)
             part.extend(multi)
             which -= count
-                
         part = conjugate(part)
-        if zeros == 'yes':
+        if zeros:
             Zs = [0] * (N - len(part))
             part.extend(Zs)
         parts.append(part)
-        
     return parts
 
 
-
-def rand_parts(Q, N, sample_size, which, zeros):
-    """ Generate uniform random partitions of Q having N parts. """
+def rand_parts(Q, N, sample_size, method, zeros):
+    """
+    Generate uniform random partitions of Q having N parts.
+    
+    Arguments:
+        Q : Total sum across parts
+        N : Number of parts to sum over
+        sample_size : number of random partitions to generate
+        method : method to use for generating the partition, options include:
+            'bottom_up', 'top_down', 'divide_and_conquer', 'multiplicity', and
+            'best'
+        zeros : boolean if True partitions can have zero values, if False
+            partitions have only positive values
+    
+    Notes:
+        method == 'best' attempts to use the values of Q and N to infer what the 
+        fastest method to comput the partition.
+    
+    """
     
     D = {} 
-    if which == 'divide_and_conquer': parts = divide_and_conquer(D, Q, N, sample_size, zeros)
-    if which == 'bottom_up':          parts = bottom_up(D, Q, N, sample_size, zeros)
-    if which == 'top_down':           parts = top_down(D, Q, N, sample_size, zeros)
-    if which == 'multiplicity':       parts = multiplicity(D, Q, N, sample_size, zeros)
-    if which == 'best':
-        if Q < 250 or N >= Q/1.5:
-            parts = bottom_up(D, Q, N, sample_size, zeros)
+    if method == 'bottom_up':          parts = bottom_up(Q, N, sample_size, D, zeros)
+    if method == 'top_down':           parts = top_down(Q, N, sample_size, D, zeros)
+    if method == 'divide_and_conquer': parts = divide_and_conquer(Q, N, sample_size, D, zeros)
+    if method == 'multiplicity':       parts = multiplicity(Q, N, sample_size, D, zeros)
+    if method == 'best':
+        if Q < 250 or N >= Q / 1.5:
+            parts = bottom_up(Q, N, sample_size, D, zeros)
         else:
-            parts = divide_and_conquer(D, Q, N, sample_size, zeros)  
-                   
+            parts = divide_and_conquer(Q, N, sample_size, D, zeros)
     return parts
-
 
         
 def most_even_partition(Q, N):
     """ Find the last lexical (i.e. most even) partition of Q having N parts """
     
-    most_even = [int(math.floor(float(Q)/float(N)))] * N
-    _remainder = int(Q%N)
-    
+    most_even = [int(math.floor(float(Q) / float(N)))] * N
+    _remainder = int(Q % N)
     j = 0
     while _remainder > 0:
         most_even[j] += 1
         _remainder -= 1
         j += 1
-    
     return most_even
 
 
 def min_max(Q, N):
     """ Find the smallest possible maximum part a partition of Q having N parts """
     
-    _min = int(math.floor(float(Q)/float(N)))
-    if int(Q%N) > 0:
+    _min = int(math.floor(float(Q) / float(N)))
+    if int(Q % N) > 0:
         _min +=1
-    
     return _min
 
     
@@ -450,6 +453,7 @@ def firstpart(Q, N, k):
 
 def next_restricted_part(p):
     """ Find the next lexical partition of Q having N parts """
+    
     Q = sum(p)
     N = len(p)
     if p == most_even_partition(Q, N):
