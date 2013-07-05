@@ -51,7 +51,8 @@ def P(D, q, k):
     number of partitions of q with k or less parts (or having k or less as the
     largest part), i.e. P(q + k, k).
     Arguments:
-        D : lookup table for numbers of partitions, P(q + k, k) values. 
+        D : a dictionary for the number of partitions of Q having N or less
+            parts (or N or less as the largest part), i.e. P(Q, Q + N).   
         q : total sum of the set
         k : number of parts      
         
@@ -120,8 +121,10 @@ def rand_parts(Q, N, sample_size, method, D={}, zeros):
         method : method to use for generating the partition, options include:
             'bottom_up', 'top_down', 'divide_and_conquer', 'multiplicity', and
             'best'
+        D : a dictionary for the number of partitions of Q having N or less
+            parts (or N or less as the largest part), i.e. P(Q, Q + N).   
         zeros : boolean if True partitions can have zero values, if False
-            partitions have only positive values
+            partitions have only positive values, defaults to False
     
     Notes:
         method == 'best' attempts to use the values of Q and N to infer what the 
@@ -168,11 +171,11 @@ def bottom_up(part, q, D, which):
     Bottom up method of generating uniform random partitions of Q having N parts.
     
     Arguments:
-        part : 
-        q : Number of parts to sum over
+        part : a list to hold the partition
+        q : The total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        which :
+        which : 
 
     """    
     while q > 0:
@@ -199,14 +202,14 @@ def top_down(part, q, D, which):
     Top down method of generating uniform random partitions of Q having N parts.
     
     Arguments:
-        part : 
-        q : Number of parts to sum over
+        part : a list to hold the partition
+        q : The total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        which :
+        which : 
 
     """    
-    while q > 1:   ## Should this be q > 0 ? DJM
+    while q > 1:   ## Shouldn't this be q > 0 ? DJM
         if part: 
             x = min(part)
         else: 
@@ -226,7 +229,7 @@ def top_down(part, q, D, which):
             break
         if q <= 0:
             break
-    part = conjugate(part)    
+    part = conjugate(part)
     return(part)
 
 
@@ -236,11 +239,12 @@ def divide_and_conquer(part, q, N, D, which):
     having N parts.
         
     Arguments:
-        part : 
-        q : Number of parts to sum over
+        part : a list to hold the partition
+        q : The total sum of the partition
+        N : Number of parts to sum over
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        which :
+        which : 
 
     """
     _max = int(N)
@@ -268,7 +272,7 @@ def divide_and_conquer(part, q, N, D, which):
     return part
 
 
-def get_multiplicity(D, which, q, k, count): 
+def get_multiplicity(q, k, D, which, count): 
     """ 
     Find the number of times a value k occurs in a partition that is being
     generated at random by the multiplicity() function. The resulting
@@ -276,10 +280,11 @@ def get_multiplicity(D, which, q, k, count):
     an updated value of count and an updated dictionary D
     
     Arguments:
-        D : 
-        which :
         q : 
         k : 
+        D : a dictionary for the number of partitions of Q having N or less
+            parts (or N or less as the largest part), i.e. P(Q, Q + N).                
+        which :
         count : count < which
     
     """
@@ -304,11 +309,11 @@ def multiplicity(part, q, D, which):
     parts.
     
     Arguments:
-        part : 
-        q : 
+        part : a list to hold the partition
+        q : The total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        which :
+        which : 
 
     """
     while q > 0:
@@ -327,7 +332,7 @@ def multiplicity(part, q, D, which):
                 break
             if count < which: # k has been found
                 k += 1
-                _list = get_multiplicity(D, which, q, k, count) # now, find how many times k occurs, i.e. the multiplicity of k
+                _list = get_multiplicity(q, k, D, which, count) # now, find how many times k occurs, i.e. the multiplicity of k 
                 multi = _list[0]
                 count = _list[1]
                 D = _list[2]
