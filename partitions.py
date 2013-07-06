@@ -129,7 +129,7 @@ def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
     
     Notes:
         method == 'best' attempts to use the values of Q and N to infer what the 
-        fastest method to comput the partition.
+        fastest method to compute the partition.
     
     """
     parts = []
