@@ -157,9 +157,9 @@ def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
             part = multiplicity(part, q, D, which)
         if method == 'best':
             if Q < 250 or N >= Q / 1.5:
-                parts = bottom_up(part, q, D, which)
+                part = bottom_up(part, q, D, which)
             else:
-                parts = divide_and_conquer(part, q, N, D, which)
+                part = divide_and_conquer(part, q, N, D, which)
         if zeros:
             Zs = [0] * (N - len(part))
             part.extend(Zs)
