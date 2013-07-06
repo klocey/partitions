@@ -42,7 +42,7 @@ rand_int = function(min=0, max=1) {
 
 last = function(x) { tail(x, n = 1) }
 
-P = function(D, q, k, use_c) {
+P = function(D, q, k, use_c, use_dict) {
   # number of partitions of q with k or less parts (or having k or less as the
   # largest part), i.e. P(q+k,k).
   # Arguments:
@@ -50,11 +50,18 @@ P = function(D, q, k, use_c) {
   #   q : total sum of the set
   #   k : number of parts
   #   use_c : logical, if TRUE the number of partitions is computed in c
-  key = paste(q, k, sep=',')
-  if (!has.key(key, D)) {
-    D[key] = NrParts(q + k, k, use_c)
-  }  
-  return(list(D, D[[key]]))
+  if (use_dict) {
+    key = paste(q, k, sep=',')
+    if (!has.key(key, D)) {
+      D[key] = NrParts(q + k, k, use_c)
+    }
+    out = list(D, D[[key]])
+  }
+  else {
+    D = NULL
+    out = list(D, NrParts(q + k, k, use_c))
+  }
+  return(out)
 }
 
 
@@ -124,7 +131,7 @@ NrParts = function(Q, N=NULL, use_c=TRUE){
 
 
 rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
-                      use_c=TRUE) {
+                      use_c=TRUE, use_dict=FALSE) {
   # Generate uniform random partitions of Q having N parts.
   # Arguments:
   #   Q : Total sum across parts
@@ -138,7 +145,8 @@ rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
   #     to a blank dictionary.
   #   zeros : boolean if True partitions can have zero values, if False
   #     partitions have only positive values, defaults to False
-  #   use_c : boolean if TRUE then compiled c code is used, default is TRUE
+  #   use_c : boolean if TRUE then compiled c code is used, defaults to TRUE
+  #   use_dict : boolean, if TRUE then a hash table is used, defaults to FALSE
   # Returns:
   #   A matrix where each column is a random partition
   # Notes:
@@ -146,10 +154,10 @@ rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
   # fastest method to compute the partition.
   parts= matrix(NA, ncol=sample_size, nrow=N)
   if (zeros) {
-    Plist = P(D, Q, N, use_c)
+    Plist = P(D, Q, N, use_c, use_dict)
   }  
   else {
-    Plist = P(D, Q - N, N, use_c)
+    Plist = P(D, Q - N, N, use_c, use_dict)
   }  
   D = Plist[[1]]
   numparts = Plist[[2]]
@@ -165,22 +173,22 @@ rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
       part = N
     }  
     if (method == 'bottom_up') {
-      part = bottom_up(part, q, D, which, use_c)
+      part = bottom_up(part, q, D, which, use_c, use_dict)
     }  
     if (method == 'top_down') {
-      part = top_down(part, q, D, which, use_c)
+      part = top_down(part, q, D, which, use_c, use_dict)
     }  
     if (method == 'divide_and_conquer') {
-      part = divide_and_conquer(part, q, N, D, which, use_c)
+      part = divide_and_conquer(part, q, N, D, which, use_c, use_dict)
     }  
     if (method == 'multiplicity') {
-      part = multiplicity(part, q, D, which, use_c)
+      part = multiplicity(part, q, D, which, use_c, use_dict)
     }  
     if (method == 'best') { 
       if (Q < 250 | N >= Q / 1.5)
-        part = bottom_up(part, q, D, which, use_c)
+        part = bottom_up(part, q, D, which, use_c, use_dict)
       else
-        part = divide_and_conquer(part, q, N, D, which, use_c)
+        part = divide_and_conquer(part, q, N, D, which, use_c, use_dict)
     }  
     if (zeros) {
       Zs = rep(0, N - length(part))
@@ -192,7 +200,7 @@ rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
   return(parts)
 }
 
-bottom_up = function(part, q, D, which, use_c) {
+bottom_up = function(part, q, D, which, use_c, use_dict) {
   # Bottom up method of generating uniform random partitions of Q having N parts.  
   # Arguments:
   #   part : a list to hold the partition
@@ -203,11 +211,11 @@ bottom_up = function(part, q, D, which, use_c) {
   #   use_c : boolean if TRUE then compiled c code is used
   while (q > 0) {
     for (k in 1:q) {
-      Plist = P(D, q, k, use_c)
+      Plist = P(D, q, k, use_c, use_dict)
       D = Plist[[1]]
       count = Plist[[2]]
       if (count >= which) {
-        Plist = P(D, q, k - 1, use_c)
+        Plist = P(D, q, k - 1, use_c, use_dict)
         D = Plist[[1]]
         count = Plist[[2]]
         break
@@ -224,7 +232,7 @@ bottom_up = function(part, q, D, which, use_c) {
   return(part)
 }
 
-top_down = function(part, q, D, which, use_c) {
+top_down = function(part, q, D, which, use_c, use_dict) {
   # Top down method of generating uniform random partitions of Q having N parts.  
   # Arguments:
   #   part : a list to hold the partition
@@ -241,7 +249,7 @@ top_down = function(part, q, D, which, use_c) {
       x = q
     }  
     for (k in x:1) {
-      Plist = P(D, q, k, use_c) # number of partitions of q having k or less as the largest part
+      Plist = P(D, q, k, use_c, use_dict) # number of partitions of q having k or less as the largest part
       D = Plist[[1]]
       count = Plist[[2]]
       if (count < which) {
@@ -265,7 +273,7 @@ top_down = function(part, q, D, which, use_c) {
 }
 
 
-divide_and_conquer = function(part, q, N, D, which, use_c) {
+divide_and_conquer = function(part, q, N, D, which, use_c, use_dict) {
   # Divide and conquer method of generating uniform random partitions of Q
   # having N parts.
   # Arguments:
@@ -281,10 +289,10 @@ divide_and_conquer = function(part, q, N, D, which, use_c) {
   min_int = 1 
   while (q > 0) {
     k = rand_int(min_int, max_int)
-    Plist = P(D, q, k, use_c)
+    Plist = P(D, q, k, use_c, use_dict)
     D = Plist[[1]]
     upper = Plist[[2]]
-    Plist = P(D, q, k - 1, use_c)
+    Plist = P(D, q, k - 1, use_c, use_dict)
     D = Plist[[1]]
     lower = Plist[[2]]
     if (lower < which & which <= upper) {
@@ -304,7 +312,7 @@ divide_and_conquer = function(part, q, N, D, which, use_c) {
   return(part)
 }
 
-get_multiplicity = function(q, k, D, which, count, use_c){
+get_multiplicity = function(q, k, D, which, count, use_c, use_dict){
   # Find the number of times a value k occurs in a partition that is being
   # generated at random by the multiplicity() function. The resulting
   # multiplicity is then passed back to the multiplicity() function along with
@@ -319,7 +327,7 @@ get_multiplicity = function(q, k, D, which, count, use_c){
   multi = NULL # the multiplicity 
   f = 1
   while (f > 0) {
-    Plist = P(D, (q - k * f), k - 1, use_c)
+    Plist = P(D, (q - k * f), k - 1, use_c, use_dict)
     D = Plist[[1]]
     count = count + Plist[[2]]
     if (count >= which) {
@@ -333,7 +341,7 @@ get_multiplicity = function(q, k, D, which, count, use_c){
 }  
 
 
-multiplicity =  function(part, q, D, which, use_c){
+multiplicity =  function(part, q, D, which, use_c, use_dict){
   # multiplicity method of generating uniform random partitions of Q having N
   # parts.
   # Arguments:
@@ -352,7 +360,7 @@ multiplicity =  function(part, q, D, which, use_c){
       x = q
     }
     for (k in x:1) { # start with largest k
-      Plist = P(D, q, k, use_c) # number of partitions of q having k or less as the largest part
+      Plist = P(D, q, k, use_c, use_dict) # number of partitions of q having k or less as the largest part
       D = Plist[[1]]
       count = Plist[[2]]
       if (count == which & which == 1) {
