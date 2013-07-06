@@ -110,7 +110,7 @@ def NrParts(*arg):
         parts = p[Q - N + 1]
     return parts
 
-def rand_parts(Q, N, sample_size, method, D={}, zeros):
+def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
     """
     Generate uniform random partitions of Q having N parts.
     
@@ -120,15 +120,16 @@ def rand_parts(Q, N, sample_size, method, D={}, zeros):
         sample_size : number of random partitions to generate
         method : method to use for generating the partition, options include:
             'bottom_up', 'top_down', 'divide_and_conquer', 'multiplicity', and
-            'best'
+            'best'. Defaults to 'best'
         D : a dictionary for the number of partitions of Q having N or less
-            parts (or N or less as the largest part), i.e. P(Q, Q + N).   
+            parts (or N or less as the largest part), i.e. P(Q, Q + N). Defaults
+            to a blank dictionary.
         zeros : boolean if True partitions can have zero values, if False
             partitions have only positive values, defaults to False
     
     Notes:
         method == 'best' attempts to use the values of Q and N to infer what the 
-        fastest method to comput the partition.
+        fastest method to compute the partition.
     
     """
     parts = []
@@ -156,9 +157,9 @@ def rand_parts(Q, N, sample_size, method, D={}, zeros):
             part = multiplicity(part, q, D, which)
         if method == 'best':
             if Q < 250 or N >= Q / 1.5:
-                parts = bottom_up(part, q, D, which)
+                part = bottom_up(part, q, D, which)
             else:
-                parts = divide_and_conquer(part, q, N, D, which)
+                part = divide_and_conquer(part, q, N, D, which)
         if zeros:
             Zs = [0] * (N - len(part))
             part.extend(Zs)
