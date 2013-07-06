@@ -1,14 +1,13 @@
 
-void NrParts(int *q, int *k, double *p) {
+void NrParts(int *Q, int *N, double *p) {
   int i, m ;
-  for (i = 2 ; i < (*k + 1) ; i++) {
-    if ((i + 1) <= (*q - i + 1 + 1)) {
-      for (m = (i + 1) ; m < (*q - i + 1 + 1) ; m++) {
-        p[m] = p[m] + p[m - i] ;
-      }
+  for (i = 2 ; i < *N ; i++) {
+    for (m = (i + 1) ; m < (*Q - i + 1 + 1) ; m++) {
+      p[m] = p[m] + p[m - i] ;
     }
   }
 }
+
 
 void conjugate(int *l, int *j, int *part, int *conj) {
   int i, k, times ;
