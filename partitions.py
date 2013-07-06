@@ -210,7 +210,7 @@ def top_down(part, q, D, which):
         which : 
 
     """    
-    while q > 1:   ## Shouldn't this be q > 0 ? DJM
+    while q > 0:   ## Shouldn't this be q > 0 ? DJM
         if part: 
             x = min(part)
         else: 
@@ -225,11 +225,7 @@ def top_down(part, q, D, which):
         which -= count
         part.append(k)
         q -= k
-        if q == 1:
-            part.append(1)
-            break
-        if q <= 0:
-            break
+        
     part = conjugate(part)
     return(part)
 
