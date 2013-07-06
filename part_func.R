@@ -1,30 +1,33 @@
 # Functions for integer partitioning. Most apply to using integer partitioning
 # to examine distributions of wealth and abundance using the feasible set. The
 # feasible set is the set all forms of the distribution having the same
-# constraint values (e.g. total abundance N, species richness S). To my
-# knowledge, no mathematical environments provide the last 4 functions listed
-# below.
+# constraint values (e.g. total abundance N, species richness S).
 # 
 # Included functions:
-# 
 # - conjugate(): get the conjugate of an integer partition (recoded from Sage,
-# see below) 
-# - NrParts(): Find the number of partitions for a given total N and
-# number of parts S (modified and recoded from GAP, see below)
+#   see below)
+# - NrParts(): Find the number of partitions for a given total N and number of
+#   parts S (modified and recoded from GAP, see below)
 # 
-# Three functions to generate uniform random integer partitions of Q having N
-# parts. Each allows the option to have summands with zero values 
-# - bottom_up(): Starts at small end of the feasible set
+# Five functions to generate uniform random integer partitions of Q having N
+# parts.  Each allows the option to have partitions with zero values.
+# - bottom_up(): Starts at smallest possible value of the largest possible
+#   part (K) 
 # - divide_and_conquer(): Start at random points in the feasible set
-# - best(): Calls one of the above two functions depending on the value of Q and Q/N
+# - top_down(): Starts at largest possible value of the largest possible part
+#   (K) 
+# - multiplicity(): uses the top_down approach but builds the partition using
+#   multiplicities (i.e. multiples of parts)
+# - best(): Calls one of the above functions depending on the value of Q and
+#   Q / N (restricted to bottom_up and divide_and_conquer for now)
 # 
-# Four partitioning functions not provided in other softwares -
-# most_even_partition(): Get the last lexical (i.e. most even) partition of Q
-# having N parts (no zeros) 
-# - min_max(): Get the smallest possible maximum part
-# a partition of Q having N parts (no zeros) 
+# Four partitioning functions not provided in other softwares
+# - most_even_partition(): Get the last lexical (i.e. most even) partition of
+#   Q having N parts (no zeros)
+# - min_max(): Get the smallest possible maximum part a partition of Q having
+#   N parts (no zeros)
 # - firstpart(): Get the first lexical partition of Q having N parts with k as
-# the largest part (no zeros) 
+#   the largest part (no zeros)
 # - next_restricted_part(): Get the next lexical partition of Q having N parts
 ##
 
@@ -32,7 +35,7 @@ dyn.load("partitions.dll")
 
 library(hash)
 
-rand_int = function( min=0, max=1) {
+rand_int = function(min=0, max=1) {
   int = ceiling(runif(1, min - 1, max))
   return(int)
 }
@@ -52,6 +55,7 @@ P = function(D, q, k, use_c) {
     D[key] = NrParts(q + k, k, use_c)
   return(list(D, D[[key]]))
 }
+
 
 conjugate = function(part, use_c=TRUE){ 
   # Find the conjugate of an integer partition
@@ -74,20 +78,25 @@ conjugate = function(part, use_c=TRUE){
     else {
       conj = rep(l, last(part))
       for (i in (l - 1):1)
-        conj = c(conj, rep(i, part[i] - part[i+1]))
+        conj = c(conj, rep(i, part[i] - part[i + 1]))
     }  
   }
   return(conj)
 }
 
-NrParts = function(Q, N, use_c = TRUE){ 
+
+NrParts = function(Q, N=NULL, use_c = TRUE){ 
   # Find the number of partition for a given total Q and number of parts N.
   # Recoded (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org
   # Arguments:
   #   Q : Total sum
   #   N : Number of items to sum across
   #   use_c : default is TRUE, the number of partitions is computed in c  
-  parts = 0
+  if (is.null(N)) {  # using p(Q) = p(Q + Q, Q)
+    N = Q
+    Q = Q * 2
+  }
+  parts = 0  
   if (Q == N | N == 1) {
     parts = 1
   }
@@ -95,25 +104,54 @@ NrParts = function(Q, N, use_c = TRUE){
     parts = 0
   }
   else {
-    q = Q
-    k = N
-    p = rep(1, q)
+    p = rep(1, Q)
     if (use_c) {
-      p = .C("NrParts", q = as.integer(q), k = as.integer(k), p = as.double(p))$p
+      p = .C("NrParts", Q = as.integer(Q), N = as.integer(N), p = as.double(p))$p
     }
     else {
-      for (i in 2:k) {
-        if ((i + 1) <= (q - i + 1)) {
-          for (m in (i + 1):(q - i + 1)) {
-            p[m + 1] = p[m + 1] + p[m - i + 1]
-          }
+      for (i in 2:N) {
+        for (m in (i + 1):(Q - i + 1)) {
+          p[m + 1] = p[m + 1] + p[m - i + 1]
         }
       }  
-    }  
-    parts = p[q - k + 2]
+    }
+    parts = p[Q - N + 2]
   }  
   return(parts)
 }
+
+def NrParts(*arg):
+  """
+    Find the number of partition for a given total Q and number of parts N.
+    Recoded on 24-Apr-2013 and modified from GAP source code: www.gap-system.org
+    Note: p(Q) = p(Q + Q, Q) thus NrParts(Q) returns the same value as NrParts
+    (Q + Q, Q)
+    
+    Arguments:
+    *arg : either Q or Q and N
+    
+    """
+
+if len(arg) == 1:  # using p(Q) = p(Q + Q, Q)
+  Q = arg[0] * 2
+N = arg[0]
+elif len(arg) == 2:    
+  Q = arg[0]
+N = arg[1]
+parts = 0
+if Q == N or N == 1:
+  parts = 1
+elif Q < N or N == 0:
+  parts = 0
+else:
+  p = [1] * Q
+for i in range(2, N + 1):  
+  for m  in range(i + 1, Q - i + 1 + 1):
+  p[m] = p[m] + p[m - i]
+parts = p[Q - N + 1]
+return parts
+
+
 
 bottom_up = function(D, Q, N, sample_size, zeros) {
   # Bottom up algo for generating uniform random partitions of Q having N parts.
