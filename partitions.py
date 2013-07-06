@@ -110,7 +110,7 @@ def NrParts(*arg):
         parts = p[Q - N + 1]
     return parts
 
-def rand_parts(Q, N, sample_size, method, D={}, zeros):
+def rand_parts(Q, N, sample_size, method, D={}, zeros=False):
     """
     Generate uniform random partitions of Q having N parts.
     
@@ -122,7 +122,8 @@ def rand_parts(Q, N, sample_size, method, D={}, zeros):
             'bottom_up', 'top_down', 'divide_and_conquer', 'multiplicity', and
             'best'
         D : a dictionary for the number of partitions of Q having N or less
-            parts (or N or less as the largest part), i.e. P(Q, Q + N).   
+            parts (or N or less as the largest part), i.e. P(Q, Q + N). Defaults
+            to a blank dictionary.
         zeros : boolean if True partitions can have zero values, if False
             partitions have only positive values, defaults to False
     
