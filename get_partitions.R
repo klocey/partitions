@@ -13,8 +13,8 @@ if (len_cl_args  > 0) {
   N = cl_args[3]
   sample_size = cl_args[4]
   zeros = cl_args[5]
-  use_dict = cl_args[6]
-  use_c = cl_args[7]
+  use_c = cl_args[6]
+  use_dict = cl_args[7]
 }
 if (len_cl_args == 0) {
   method = 'bottom_up'
@@ -22,8 +22,8 @@ if (len_cl_args == 0) {
   N = 10
   sample_size = 10
   zeros = FALSE
-  use_dict = FALSE
   use_c = TRUE
+  use_dict = FALSE
 }
 
 
@@ -37,8 +37,8 @@ zeros = fix_arg(zeros)
 use_dict = fix_arg(use_dict)
 use_c = fix_arg(use_c)
 
-eval(parse(text = paste(method,'(',paste('NULL', Q, N, sample_size, zeros,
-                        use_dict, use_c, sep=','), ')', sep='')))
+eval(parse(text = paste('rand_parts(',paste(Q, N, sample_size, 'method',
+                        zeros, use_c, use_dict, sep=','), ')', sep='')))
 
 
 
