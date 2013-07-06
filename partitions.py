@@ -127,6 +127,8 @@ def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
         zeros : boolean if True partitions can have zero values, if False
             partitions have only positive values, defaults to False
     
+    Returns: A list of lists
+    
     Notes:
         method == 'best' attempts to use the values of Q and N to infer what the 
         fastest method to compute the partition.
@@ -134,11 +136,11 @@ def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
     """
     parts = []
     if zeros:
-        _list = P(D, Q, N)    
+        Plist = P(D, Q, N)    
     else:
-        _list = P(D, Q - N, N)
-    D = _list[0]
-    numparts = _list[1]        
+        Plist = P(D, Q - N, N)
+    D = Plist[0]
+    numparts = Plist[1]        
     while len(parts) < sample_size:
         which = random.randrange(1, numparts + 1)
         if zeros:
@@ -181,13 +183,13 @@ def bottom_up(part, q, D, which):
     """    
     while q > 0:
         for k in range(1, q + 1):
-            _list = P(D, q, k) # number of partitions of q having k or less as the largest part
-            D = _list[0]
-            count = _list[1]
+            Plist = P(D, q, k) # number of partitions of q having k or less as the largest part
+            D = Plist[0]
+            count = Plist[1]
             if count >= which:
-                _list = P(D, q, k - 1)
-                D = _list[0]
-                count = _list[1]
+                Plist = P(D, q, k - 1)
+                D = Plist[0]
+                count = Plist[1]
                 break
         part.append(k)
         q -= k
@@ -211,14 +213,14 @@ def top_down(part, q, D, which):
 
     """    
     while q > 1:   ## Shouldn't this be q > 0 ? DJM
-        if part: 
+        if part != []: 
             x = min(part)
         else: 
             x = q
         for k in reversed(range(1, x + 1)):
-            _list = P(D, q, k) # number of partitions of q having k or less as the largest part
-            D = _list[0]
-            count = _list[1]
+            Plist = P(D, q, k) # number of partitions of q having k or less as the largest part
+            D = Plist[0]
+            count = Plist[1]
             if count < which:
                 k += 1
                 break
@@ -248,27 +250,27 @@ def divide_and_conquer(part, q, N, D, which):
         which : 
 
     """
-    _max = int(N)
-    _min = int(1)
+    max_int = int(N)
+    min_int = int(1)
     while q > 0:
-        k = random.randrange(_min, _max + 1)
-        _list = P(D, q, k)
-        D = _list[0]
-        upper = _list[1]
-        _list = P(D, q, k - 1)
-        D = _list[0]
-        lower = _list[1]
+        k = random.randrange(min_int, max_int + 1)
+        Plist = P(D, q, k)
+        D = Plist[0]
+        upper = Plist[1]
+        Plist = P(D, q, k - 1)
+        D = Plist[0]
+        lower = Plist[1]
         if lower < which and which <= upper: 
             part.append(k)
             q -= k
-            _max = k
-            _min = 1
+            max_int = k
+            min_int = 1
             num = int(upper - lower)
             which = random.randrange(1, num + 1)
         elif which > upper:
-            _min = k + 1    
+            min_int = k + 1    
         elif which <= lower:
-            _max = k - 1    
+            max_int = k - 1    
     part = conjugate(part)
     return part
 
@@ -292,16 +294,16 @@ def get_multiplicity(q, k, D, which, count):
     
     multi = [] # the multiplicity 
     f = 1
-    while f:
-        _list = P(D, (q - k * f), k - 1)
-        D = _list[0]
-        count += _list[1]
+    while f > 0:
+        Plist = P(D, (q - k * f), k - 1)
+        D = Plist[0]
+        count += Plist[1]
         if count >= which:
-            count -= _list[1]
+            count -= Plist[1]
             multi = [k] * f
             break                
         f += 1
-    return [multi, count, D]
+    return [D, count, multi]
 
 
 def multiplicity(part, q, D, which):
@@ -319,24 +321,24 @@ def multiplicity(part, q, D, which):
     """
     while q > 0:
         multi = []
-        if part:
+        if part != []:
             x = min(part)
         else: 
             x = int(q)
         for k in reversed(range(1, x + 1)): # start with largest k
-            _list = P(D, q, k) # number of partitions of q having k or less as the largest part
-            D = _list[0]
-            count = _list[1]
+            Plist = P(D, q, k) # number of partitions of q having k or less as the largest part
+            D = Plist[0]
+            count = Plist[1]
             if count == which and which == 1:
                 multi = [1] * q
-                q=0
+                q = 0
                 break
             if count < which: # k has been found
                 k += 1
-                _list = get_multiplicity(q, k, D, which, count) # now, find how many times k occurs, i.e. the multiplicity of k 
-                multi = _list[0]
-                count = _list[1]
-                D = _list[2]
+                Mlist = get_multiplicity(q, k, D, which, count) # now, find how many times k occurs, i.e. the multiplicity of k 
+                D = Mlist[0]
+                count = Mlist[1]
+                multi = Mlist[2]
                 break
         q -= sum(multi)
         part.extend(multi)
@@ -361,10 +363,10 @@ def most_even_partition(Q, N):
 def min_max(Q, N):
     """ Find the smallest possible maximum part a partition of Q having N parts """
     
-    _min = int(math.floor(float(Q) / float(N)))
+    min_int = int(math.floor(float(Q) / float(N)))
     if int(Q % N) > 0:
-        _min +=1
-    return _min
+        min_int +=1
+    return min_int
 
     
 def firstpart(Q, N, k):
