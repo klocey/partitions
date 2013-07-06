@@ -51,8 +51,9 @@ P = function(D, q, k, use_c) {
   #   k : number of parts
   #   use_c : logical, if TRUE the number of partitions is computed in c
   key = paste(q, k, sep=',')
-  if (!has.key(key, D))
+  if (!has.key(key, D)) {
     D[key] = NrParts(q + k, k, use_c)
+  }  
   return(list(D, D[[key]]))
 }
 
@@ -64,8 +65,9 @@ conjugate = function(part, use_c=TRUE){
   # Arguments:
   # part : a vector that represents an integer partition
   # use_c : default is TRUE, the conjugate is computed in c
-  if (is.null(part))
+  if (is.null(part)) {
     conj = NULL
+  }  
   else {
     l = length(part)
     if (use_c) {
@@ -85,7 +87,7 @@ conjugate = function(part, use_c=TRUE){
 }
 
 
-NrParts = function(Q, N=NULL, use_c = TRUE){ 
+NrParts = function(Q, N=NULL, use_c=TRUE){ 
   # Find the number of partition for a given total Q and number of parts N.
   # Recoded (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org
   # Arguments:
@@ -120,395 +122,257 @@ NrParts = function(Q, N=NULL, use_c = TRUE){
   return(parts)
 }
 
-def NrParts(*arg):
-  """
-    Find the number of partition for a given total Q and number of parts N.
-    Recoded on 24-Apr-2013 and modified from GAP source code: www.gap-system.org
-    Note: p(Q) = p(Q + Q, Q) thus NrParts(Q) returns the same value as NrParts
-    (Q + Q, Q)
-    
-    Arguments:
-    *arg : either Q or Q and N
-    
-    """
 
-if len(arg) == 1:  # using p(Q) = p(Q + Q, Q)
-  Q = arg[0] * 2
-N = arg[0]
-elif len(arg) == 2:    
-  Q = arg[0]
-N = arg[1]
-parts = 0
-if Q == N or N == 1:
-  parts = 1
-elif Q < N or N == 0:
-  parts = 0
-else:
-  p = [1] * Q
-for i in range(2, N + 1):  
-  for m  in range(i + 1, Q - i + 1 + 1):
-  p[m] = p[m] + p[m - i]
-parts = p[Q - N + 1]
-return parts
-
-
-
-bottom_up = function(D, Q, N, sample_size, zeros) {
-  # Bottom up algo for generating uniform random partitions of Q having N parts.
+rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
+                      use_c=TRUE) {
+  # Generate uniform random partitions of Q having N parts.
   # Arguments:
-  #   D: a dictionary for the number of partitions of Q having N or less parts
-  #     (or N or less as the largest part), i.e. P(Q,Q+N).
   #   Q : Total sum across parts
   #   N : Number of parts to sum over
   #   sample_size : number of random partitions to generate
-  #   zeros: boolean if TRUE summands can have zero values, if FALSE summands
-  #     have only positive values
-  parts = NULL
-  if (!zeros) {
-        
-  }
-}
-
-rand_parts1 = function(N, S, sample_size, use_dict=FALSE, use_c=TRUE) { 
-  # Generate a uniform random partition of n having s parts.
-  # Arguments:
-  # N : Total number of individuals
-  # S : Total number of species
-  # sample_size : number of random partitions to return
-  # use_dict : default is FALSE, if TRUE then a dictionary/hash table is used to store
-  #   numbers of partitions, if running c-code for computed number of partions
-  #   then this tends to slow things down
-  # use_c : default is TRUE, the number of partitions and the conjugate are computed
-  #   in c rather than in R this makes for a big speed gain
-  if (use_dict) {
-    D = hash()
-    P = function(n, x, use_c) {
-      # compute number of partitions of n having x or less as the
-      # largest part
-      key = paste(n, x, sep=',')
-      if (!has.key(key, D))
-        D[key] = NrParts(n + x, x, use_c)
-      return(D[[key]])
-    }
+  #   method : method to use for generating the partition, options include:
+  #     'bottom_up', 'top_down', 'divide_and_conquer', 'multiplicity', and
+  #     'best'. Defaults to 'best'
+  #   D : a dictionary for the number of partitions of Q having N or less
+  #     parts (or N or less as the largest part), i.e. P(Q, Q + N). Defaults
+  #     to a blank dictionary.
+  #   zeros : boolean if True partitions can have zero values, if False
+  #     partitions have only positive values, defaults to False
+  #   use_c : boolean if TRUE then compiled c code is used, default is TRUE
+  # Returns:
+  #   A matrix where each column is a random partition
+  # Notes:
+  # method == 'best' attempts to use the values of Q and N to infer what the 
+  # fastest method to compute the partition.
+  parts= matrix(NA, ncol=sample_size, nrow=N)
+  if (zeros) {
+    Plist = P(D, Q, N, use_c)
   }  
   else {
-    P = function(n, x, use_c) {
-      numparts = NrParts(n + x, x, use_c)
-      return(numparts)
-    }
+    Plist = P(D, Q - N, N, use_c)
   }  
-  part_matrix = matrix(NA, ncol=sample_size, nrow=S)
-  numparts = P(N - S, S, use_c)
-  ipart = 1
-  while (ipart <= sample_size) {
-    n = N - S
-    part = S # first element of part must equal s (because the conjugate must have s parts)
-    which = rand_int(1, numparts)
-    while (n > 0) {
-      for (k in 1:n) {
-        count = P(n, k, use_c) # number of partitions of N having K or less as the largest part
-        if (count >= which) {
-          count = P(n, k - 1, use_c)
-          break
-        }
-      }  
-      part = c(part, k)
-      n = n - k
-      if (n == 0)
-        break
-      which = which - count
-    }
-    part = conjugate(part, use_c)
-    part_matrix[ , ipart] = part
-    ipart = ipart + 1
-  }  
-  return(part_matrix)
-}
-
-rand_parts2 = function(N, S, sample_size, use_dict=FALSE, use_c=TRUE) {
-  # Generate a uniform random partition of n having k parts.
-  # Arguments:
-  # N : Total number of individuals
-  # S : Total number of species
-  # sample_size : number of random partitions to return
-  # use_dict : default is FALSE, if TRUE then a dictionary/hash table is used to store
-  #   numbers of partitions, if running c-code for computed number of partions
-  #   then this tends to slow things down
-  # use_c : default is TRUE, the number of partitions and the conjugate are computed
-  #   in c rather than in R this makes for a big speed gain
-  if (use_dict) {
-    D = hash()
-    P = function(n, x, use_c) {
-      # compute number of partitions of n having x or less as the
-      # largest part
-      key = paste(n, x, sep=',')
-      if (!has.key(key, D))
-        D[key] = NrParts(n + x, x, use_c)
-      return(D[[key]])
-    }
-  }  
-  else {
-    P = function(n, x, use_c) {
-      numparts = NrParts(n + x, x, use_c)
-      return(numparts)
-    }
-  }  
-  part_matrix = matrix(NA, ncol=sample_size, nrow=S)
-  numparts = P(N - S, S, use_c)
+  D = Plist[[1]]
+  numparts = Plist[[2]]
   ipart = 1
   while (ipart <= sample_size) {
     which = rand_int(1, numparts)
-    n = N - S
-    part = S
-    max_k = S
-    min_k = 1
-    while (n > 0) {
-      k = rand_int(min_k, max_k)
-      upper = P(n, k, use_c)
-      lower = P(n, k - 1, use_c)
-      if (lower < which & which <= upper) {
-        part = c(part, k)
-        n = n - k
-        max_k = k
-        min_k = 1
-        num = upper - lower
-        which = rand_int(1, num)
-      }
-      else if (which > upper)
-        min_k = k + 1
-      else if (which <= lower)
-        max_k = k - 1
-    }  
-    part = conjugate(part, use_c)
-    part_matrix[ , ipart] = part
-    ipart = ipart + 1
-  }
-  return(part_matrix)
-}
-
-rand_parts_zero1 = function(N, S, sample_size, use_dict=FALSE, use_c=TRUE) { 
-  # Generate a uniform random partition of n having s parts.
-  # Arguments:
-  # N : Total number of individuals
-  # S : Total number of species
-  # sample_size : number of random partitions to return
-  # use_dict : default is FALSE, if TRUE then a dictionary/hash table is used to store
-  #   numbers of partitions, if running c-code for computed number of partions
-  #   then this tends to slow things down
-  # use_c : default is TRUE, the number of partitions and the conjugate are computed
-  #   in c rather than in R this makes for a big speed gain
-  if (use_dict) {
-    D = hash()
-    P = function(n, x, use_c) {
-      # compute number of partitions of n having x or less as the
-      # largest part
-      key = paste(n, x, sep=',')
-      if (!has.key(key, D))
-        D[key] = NrParts(n + x, x, use_c)
-      return(D[[key]])
-    }
-  }  
-  else {
-    P = function(n, x, use_c) {
-      numparts = NrParts(n + x, x, use_c)
-      return(numparts)
-    }
-  }  
-  part_matrix = matrix(NA, ncol=sample_size, nrow=S)
-  numparts = P(N, S, use_c)
-  ipart = 1
-  while (ipart <= sample_size) {
-    n = N 
-    part = NULL
-    which = rand_int(1, numparts)
-    while (n > 0) {
-      for (k in 1:n) {
-        count = P(n, k, use_c) # number of partitions of N having K or less as the largest part
-        if (count >= which) {
-          count = P(n, k - 1, use_c)
-          break
-        }
-      }  
-      part = c(part, k)
-      n = n - k
-      if (n == 0)
-        break
-      which = which - count
-    }
-    part = conjugate(part, use_c)
-    len_part = length(part)
-    if (len_part < S) {
-      zeros = rep(0, S - len_part)
-      part = c(part, zeros)
-    }  
-    part_matrix[ , ipart] = part
-    ipart = ipart + 1
-  }  
-  return(part_matrix)
-}
-
-rand_parts_zero2 = function(N, S, sample_size, use_dict=FALSE, use_c=TRUE) {
-  # Generate a uniform random partition of n having k parts.
-  # Arguments:
-  # N : Total number of individuals
-  # S : Total number of species
-  # sample_size : number of random partitions to return
-  # use_dict : default is FALSE, if TRUE then a dictionary/hash table is used to store
-  #   numbers of partitions, if running c-code for computed number of partions
-  #   then this tends to slow things down
-  # use_c : default is TRUE, the number of partitions and the conjugate are computed
-  #   in c rather than in R this makes for a big speed gain  
-  if (use_dict) {
-    D = hash()
-    P = function(n, x, use_c) {
-      # compute number of partitions of n having x or less as the
-      # largest part
-      key = paste(n, x, sep=',')
-      if (!has.key(key, D))
-        D[key] = NrParts(n + x, x, use_c)
-      return(D[[key]])
-    }
-  }  
-  else {
-    P = function(n, x, use_c) {
-      numparts = NrParts(n + x, x, use_c)
-      return(numparts)
-    }
-  }  
-  part_matrix = matrix(NA, ncol=sample_size, nrow=S)
-  numparts = P(N, S, use_c)
-  ipart = 1
-  while (ipart <= sample_size) {
-    which = rand_int(1, numparts)
-    n = N
-    part = NULL
-    max_k = S
-    min_k = 1
-    while (n > 0) {
-      k = rand_int(min_k, max_k)
-      upper = P(n, k, use_c)
-      lower = P(n, k - 1, use_c)
-      if (lower < which & which <= upper) {
-        part = c(part, k)
-        n = n - k
-        max_k = k
-        min_k = 1
-        num = upper - lower
-        which = rand_int(1, num)
-      }
-      else if (which > upper)
-        min_k = k + 1
-      else if (which <= lower)
-        max_k = k - 1
-    }  
-    part = conjugate(part, use_c)
-    len_part = length(part)
-    if (len_part < S) {
-      zeros = rep(0, S - len_part)
-      part = c(part, zeros)
-    }  
-    part_matrix[ , ipart] = part
-    ipart = ipart + 1
-  }
-  return(part_matrix)
-}
-
-rand_parts = function(N, S, sample_size, method, include_zeros=FALSE,
-                      use_dict=FALSE, use_c=TRUE) {
-  # Generate a uniform random partition of n having k parts.
-  # Arguments:
-  # N : Total number of individuals
-  # S : Total number of species
-  # sample_size : number of random partitions to return
-  # method : which algo to use 1 or 2
-  # include_zeros : default is FALSE, if TRUE zeros are included in the partitions
-  # use_dict : default is FALSE, if TRUE then a dictionary/hash table is used to store
-  #   numbers of partitions, if running c-code for computed number of partions
-  #   then this tends to slow things down
-  # use_c : default is TRUE, the number of partitions and the conjugate are computed
-  #   in c rather than in R this makes for a big speed gain
-  # 
-  if (use_dict) {
-    D = hash()
-    P = function(n, x, use_c) {
-      # compute number of partitions of n having x or less as the
-      # largest part
-      key = paste(n, x, sep=',')
-      if (!has.key(key, D))
-        D[key] = NrParts(n + x, x, use_c)
-      return(D[[key]])
-    }
-  }  
-  else {
-    P = function(n, x, use_c) {
-      numparts = NrParts(n + x, x, use_c)
-      return(numparts)
-    }
-  }  
-  part_matrix = matrix(NA, ncol=sample_size, nrow=S)
-  if (include_zeros)
-    numparts = P(N, S, use_c)
-  else
-    numparts = P(N - S, S, use_c)
-  ipart = 1
-  while (ipart <= sample_size) {
-    which = rand_int(1, numparts)
-    if (include_zeros) {
-      n = N
-      part = NULL 
+    if (zeros) {
+      q = Q
+      part = NULL
     }
     else {
-      n = N - S 
-      part = S # first element of part must equal s (because the conjugate must have s parts)
-    }
-    if (method == 1) {
-      while (n > 0) {
-        for (k in 1:n) {
-          count = P(n, k, use_c) # number of partitions of N having K or less as the largest part
-          if (count >= which) {
-            count = P(n, k - 1, use_c)
-            break
-          }
-        }  
-        part = c(part, k)
-        n = n - k
-        if (n == 0)
-          break
-        which = which - count
-      }
-    }
-    if (method == 2) {
-      max_k = S
-      min_k = 1
-      while (n > 0) {
-        k = rand_int(min_k, max_k)
-        upper = P(n, k, use_c)
-        lower = P(n, k - 1, use_c)
-        if (lower < which & which <= upper) {
-          part = c(part, k)
-          n = n - k
-          max_k = k
-          min_k = 1
-          num = upper - lower
-          which = rand_int(1, num)
-        }
-        else if (which > upper)
-          min_k = k + 1
-        else if (which <= lower)
-          max_k = k - 1
-      }  
-      
+      q = Q - N
+      part = N
     }  
-    part = conjugate(part, use_c)
-    if (include_zeros) {
-      len_part = length(part)
-      if (len_part < S) {
-        zeros = rep(0, S - len_part)
-        part = c(part, zeros)
+    if (method == 'bottom_up') {
+      part = bottom_up(part, q, D, which, use_c)
+    }  
+    if (method == 'top_down') {
+      part = top_down(part, q, D, which, use_c)
+    }  
+    if (method == 'divide_and_conquer') {
+      part = divide_and_conquer(part, q, N, D, which, use_c)
+    }  
+    if (method == 'multiplicity') {
+      part = multiplicity(part, q, D, which, use_c)
+    }  
+    if (method == 'best') { 
+      if (Q < 250 | N >= Q / 1.5)
+        part = bottom_up(part, q, D, which, use_c)
+      else
+        part = divide_and_conquer(part, q, N, D, which, use_c)
+    }  
+    if (zeros) {
+      Zs = rep(0, N - length(part))
+      part = c(part, Zs)
+    }  
+    parts[ , ipart] = part
+    ipart = ipart + 1
+  } 
+  return(parts)
+}
+
+bottom_up = function(part, q, D, which, use_c) {
+  # Bottom up method of generating uniform random partitions of Q having N parts.  
+  # Arguments:
+  #   part : a list to hold the partition
+  #   q : The total sum of the partition
+  #   D : a dictionary for the number of partitions of Q having N or less
+  #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+  #   which : 
+  #   use_c : boolean if TRUE then compiled c code is used
+  while (q > 0) {
+    for (k in 1:q) {
+      Plist = P(D, q, k, use_c)
+      D = Plist[[1]]
+      count = Plist[[2]]
+      if (count >= which) {
+        Plist = P(D, q, k - 1, use_c)
+        D = Plist[[1]]
+        count = Plist[[2]]
+        break
       }
     }  
-    part_matrix[ , ipart] = part
-    ipart = ipart + 1  
+    part = c(part, k) 
+    q = q - k
+    if (q == 0) {
+      break
+    }  
+    which = which - count
   }
-  return(part_matrix)
+  part = conjugate(part, use_c)
+  return(part)
+}
+
+top_down = function(part, q, D, which, use_c) {
+  # Top down method of generating uniform random partitions of Q having N parts.  
+  # Arguments:
+  #   part : a list to hold the partition
+  #   q : The total sum of the partition
+  #   D : a dictionary for the number of partitions of Q having N or less
+  #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+  #   which : 
+  #   use_c : boolean if TRUE then compiled c code is used
+  while (q > 1) {
+    if (!is.null(part)) {
+      x = min(part)
+    }  
+    else {
+      x = q
+    }  
+    for (k in x:1) {
+      Plist = P(D, q, k, use_c) # number of partitions of q having k or less as the largest part
+      D = Plist[[1]]
+      count = Plist[[2]]
+      if (count < which) {
+        k = k + 1
+        break
+      }
+    }
+    which = which - count
+    part = c(part, k)
+    q = q - k
+    if (q == 1) {
+      part = c(part, 1)
+      break
+    }  
+    if (q <= 0) {
+      break
+    }
+  }
+  part = conjugate(part, use_c)
+  return(part)
+}
+
+
+divide_and_conquer = function(part, q, N, D, which, use_c) {
+  # Divide and conquer method of generating uniform random partitions of Q
+  # having N parts.
+  # Arguments:
+  #   part : a list to hold the partition
+  #   q : The total sum of the partition
+  #   N : Number of parts to sum over
+  #   D : a dictionary for the number of partitions of Q having N or less
+  #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+  #   which : 
+  #   use_c :
+  
+  max_int = N
+  min_int = 1 
+  while (q > 0) {
+    k = rand_int(min_int, max_int)
+    Plist = P(D, q, k, use_c)
+    D = Plist[[1]]
+    upper = Plist[[2]]
+    Plist = P(D, q, k - 1, use_c)
+    D = Plist[[1]]
+    lower = Plist[[2]]
+    if (lower < which & which <= upper) {
+      part = c(part, k)
+      q = q - k
+      max_int = k
+      min_int = 1
+      num = upper - lower
+      which = rand_int(1, num)
+    }
+    else if (which > upper)
+      min_int = k + 1
+    else if (which <= lower)
+      max_int = k - 1
+  }
+  part = conjugate(part, use_c)
+  return(part)
+}
+
+get_multiplicity = function(q, k, D, which, count, use_c){
+  # Find the number of times a value k occurs in a partition that is being
+  # generated at random by the multiplicity() function. The resulting
+  # multiplicity is then passed back to the multiplicity() function along with
+  # an updated value of count and an updated dictionary D
+  # Arguments:
+  #   q : 
+  #   k : 
+  #   D : a dictionary for the number of partitions of Q having N or less
+  #   parts (or N or less as the largest part), i.e. P(Q, Q + N).                
+  #   which :
+  #   count : count < which
+  multi = NULL # the multiplicity 
+  f = 1
+  while (f > 0) {
+    Plist = P(D, (q - k * f), k - 1, use_c)
+    D = Plist[[1]]
+    count = count + Plist[[2]]
+    if (count >= which) {
+      count = count - Plist[[2]]
+      multi = rep(k, f)
+      break
+    }
+    f = f + 1
+  }
+  return(list(D, count, multi))
+}  
+
+
+multiplicity =  function(part, q, D, which, use_c){
+  # multiplicity method of generating uniform random partitions of Q having N
+  # parts.
+  # Arguments:
+  #   part : a list to hold the partition
+  #   q : The total sum of the partition
+  #   D : a dictionary for the number of partitions of Q having N or less
+  #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+  #   which : 
+  #   use_c :
+  while (q > 0) {
+    multi = NULL
+    if (!is.null(part)) {
+      x = min(part)
+    } 
+    else {
+      x = q
+    }
+    for (k in x:1) { # start with largest k
+      Plist = P(D, q, k, use_c) # number of partitions of q having k or less as the largest part
+      D = Plist[[1]]
+      count = Plist[[2]]
+      if (count == which & which == 1) {
+        multi = rep(1, q)
+        q = 0
+        break
+      }   
+      if (count < which) { # k has been found
+        k = k + 1
+        Mlist = get_multiplicity(q, k, D, which, count, use_c) # now, find how many times k occurs, i.e. the multiplicity of k 
+        D = Mlist[[1]]
+        count = Mlist[[2]]
+        multi = Mlist[[3]]
+        break
+      }
+    }
+    q = q - sum(multi)
+    part = c(part, multi)
+    which = which - count
+  }  
+  part = conjugate(part)
+  return(part)
 }
