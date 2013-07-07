@@ -7,17 +7,17 @@ cl_args = commandArgs(trailingOnly=TRUE)
 
 len_cl_args = length(cl_args)
 
-if (len_cl_args  > 0) {
+if (len_cl_args > 0) {
   method = cl_args[1]
-  Q = cl_args[2]
-  N = cl_args[3]
-  sample_size = cl_args[4]
-  zeros = cl_args[5]
-  use_c = cl_args[6]
-  use_dict = cl_args[7]
+  Q = as.numeric(cl_args[2])
+  N = as.numeric(cl_args[3])
+  sample_size = as.numeric(cl_args[4])
+  zeros = as.logical(cl_args[5])
+  use_c = as.logical(cl_args[6])
+  use_dict = as.logical(cl_args[7])
 }
 if (len_cl_args == 0) {
-  method = 'bottom_up'
+  method = 'best'
   Q = 100
   N = 10
   sample_size = 10
@@ -25,6 +25,14 @@ if (len_cl_args == 0) {
   use_c = TRUE
   use_dict = FALSE
 }
+
+print(method)
+print(Q)
+print(N)
+print(sample_size)
+print(zeros)
+print(use_c)
+print(use_dict)
 
 
 fix_arg = function(arg) {
@@ -37,8 +45,8 @@ zeros = fix_arg(zeros)
 use_dict = fix_arg(use_dict)
 use_c = fix_arg(use_c)
 
-eval(parse(text = paste('rand_parts(',paste(Q, N, sample_size, 'method',
-                        zeros, use_c, use_dict, sep=','), ')', sep='')))
+eval(parse(text = 
+     'rand_parts(Q, N, sample_size, method, hash(), zeros, use_c, use_dict)'))
 
 
 
