@@ -212,7 +212,7 @@ def top_down(part, q, D, rand_int):
         rand_int : 
 
     """    
-    while q > 1:   ## Shouldn't this be q > 0 ? DJM
+    while q > 0:
         if part != []: 
             x = min(part)
         else: 
@@ -227,11 +227,7 @@ def top_down(part, q, D, rand_int):
         rand_int -= count
         part.append(k)
         q -= k
-        if q == 1:
-            part.append(1)
-            break
-        if q <= 0:
-            break
+        
     part = conjugate(part)
     return(part)
 
