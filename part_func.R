@@ -30,10 +30,17 @@
 #   the largest part (no zeros)
 # - next_restricted_part(): Get the next lexical partition of Q having N parts
 ##
-
-dyn.load("partitions.dll")
-
 library(hash)
+
+load_c = function(...) {
+  if (!is.loaded("NrParts")) {
+    OS = Sys.info()['sysname']
+    if (OS == 'Linux')
+      dyn.load('partitions.so')
+    if (OS == 'Windows')
+      dyn.load('partitions.dll')
+  }
+}
 
 get_rand_int = function(min=0, max=1) {
   int = ceiling(runif(1, min - 1, max))
