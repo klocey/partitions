@@ -142,7 +142,7 @@ def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
     D = Plist[0]
     numparts = Plist[1]        
     while len(parts) < sample_size:
-        which = random.randrange(1, numparts + 1)
+        rand_int = random.randrange(1, numparts + 1)
         if zeros:
             q = int(Q)
             part = []
@@ -150,18 +150,18 @@ def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
             q = int(Q - N)
             part = [N]
         if method == 'bottom_up':
-            part = bottom_up(part, q, D, which)
+            part = bottom_up(part, q, D, rand_int)
         if method == 'top_down':
-            part = top_down(part, q, D, which)
+            part = top_down(part, q, D, rand_int)
         if method == 'divide_and_conquer':
-            part = divide_and_conquer(part, q, N, D, which)
+            part = divide_and_conquer(part, q, N, D, rand_int)
         if method == 'multiplicity':
-            part = multiplicity(part, q, D, which)
+            part = multiplicity(part, q, D, rand_int)
         if method == 'best':
             if Q < 250 or N >= Q / 1.5:
-                part = bottom_up(part, q, D, which)
+                part = bottom_up(part, q, D, rand_int)
             else:
-                part = divide_and_conquer(part, q, N, D, which)
+                part = divide_and_conquer(part, q, N, D, rand_int)
         if zeros:
             Zs = [0] * (N - len(part))
             part.extend(Zs)
@@ -169,7 +169,7 @@ def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
     return parts
 
 
-def bottom_up(part, q, D, which):
+def bottom_up(part, q, D, rand_int):
     """
     Bottom up method of generating uniform random partitions of Q having N parts.
     
@@ -178,7 +178,7 @@ def bottom_up(part, q, D, which):
         q : The total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        which : 
+        rand_int : 
 
     """    
     while q > 0:
@@ -186,7 +186,7 @@ def bottom_up(part, q, D, which):
             Plist = P(D, q, k) # number of partitions of q having k or less as the largest part
             D = Plist[0]
             count = Plist[1]
-            if count >= which:
+            if count >= rand_int:
                 Plist = P(D, q, k - 1)
                 D = Plist[0]
                 count = Plist[1]
@@ -195,12 +195,12 @@ def bottom_up(part, q, D, which):
         q -= k
         if q == 0:
             break
-        which -= count
+        rand_int -= count
     part = conjugate(part)    
     return(part)
 
 
-def top_down(part, q, D, which):
+def top_down(part, q, D, rand_int):
     """
     Top down method of generating uniform random partitions of Q having N parts.
     
@@ -209,7 +209,7 @@ def top_down(part, q, D, which):
         q : The total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        which : 
+        rand_int : 
 
     """    
     while q > 1:   ## Shouldn't this be q > 0 ? DJM
@@ -221,10 +221,10 @@ def top_down(part, q, D, which):
             Plist = P(D, q, k) # number of partitions of q having k or less as the largest part
             D = Plist[0]
             count = Plist[1]
-            if count < which:
+            if count < rand_int:
                 k += 1
                 break
-        which -= count
+        rand_int -= count
         part.append(k)
         q -= k
         if q == 1:
@@ -236,7 +236,7 @@ def top_down(part, q, D, which):
     return(part)
 
 
-def divide_and_conquer(part, q, N, D, which):
+def divide_and_conquer(part, q, N, D, rand_int):
     """
     Divide and conquer method of generating uniform random partitions of Q
     having N parts.
@@ -247,7 +247,7 @@ def divide_and_conquer(part, q, N, D, which):
         N : Number of parts to sum over
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        which : 
+        rand_int : 
 
     """
     max_int = int(N)
@@ -260,22 +260,22 @@ def divide_and_conquer(part, q, N, D, which):
         Plist = P(D, q, k - 1)
         D = Plist[0]
         lower = Plist[1]
-        if lower < which and which <= upper: 
+        if lower < rand_int and rand_int <= upper: 
             part.append(k)
             q -= k
             max_int = k
             min_int = 1
             num = int(upper - lower)
-            which = random.randrange(1, num + 1)
-        elif which > upper:
+            rand_int = random.randrange(1, num + 1)
+        elif rand_int > upper:
             min_int = k + 1    
-        elif which <= lower:
+        elif rand_int <= lower:
             max_int = k - 1    
     part = conjugate(part)
     return part
 
 
-def get_multiplicity(q, k, D, which, count): 
+def get_multiplicity(q, k, D, rand_int, count): 
     """ 
     Find the number of times a value k occurs in a partition that is being
     generated at random by the multiplicity() function. The resulting
@@ -287,8 +287,8 @@ def get_multiplicity(q, k, D, which, count):
         k : 
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).                
-        which :
-        count : count < which
+        rand_int :
+        count : count < rand_int
     
     """
     
@@ -298,7 +298,7 @@ def get_multiplicity(q, k, D, which, count):
         Plist = P(D, (q - k * f), k - 1)
         D = Plist[0]
         count += Plist[1]
-        if count >= which:
+        if count >= rand_int:
             count -= Plist[1]
             multi = [k] * f
             break                
@@ -306,7 +306,7 @@ def get_multiplicity(q, k, D, which, count):
     return [D, count, multi]
 
 
-def multiplicity(part, q, D, which):
+def multiplicity(part, q, D, rand_int):
     """
     multiplicity method of generating uniform random partitions of Q having N
     parts.
@@ -316,7 +316,7 @@ def multiplicity(part, q, D, which):
         q : The total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        which : 
+        rand_int : 
 
     """
     while q > 0:
@@ -329,20 +329,20 @@ def multiplicity(part, q, D, which):
             Plist = P(D, q, k) # number of partitions of q having k or less as the largest part
             D = Plist[0]
             count = Plist[1]
-            if count == which and which == 1:
+            if count == rand_int and rand_int == 1:
                 multi = [1] * q
                 q = 0
                 break
-            if count < which: # k has been found
+            if count < rand_int: # k has been found
                 k += 1
-                Mlist = get_multiplicity(q, k, D, which, count) # now, find how many times k occurs, i.e. the multiplicity of k 
+                Mlist = get_multiplicity(q, k, D, rand_int, count) # now, find how many times k occurs, i.e. the multiplicity of k 
                 D = Mlist[0]
                 count = Mlist[1]
                 multi = Mlist[2]
                 break
         q -= sum(multi)
         part.extend(multi)
-        which -= count    
+        rand_int -= count    
     part = conjugate(part)
     return part
 
