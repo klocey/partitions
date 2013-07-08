@@ -211,7 +211,7 @@ bottom_up = function(part, q, D, rand_int, use_c, use_dict) {
   # Bottom up method of generating uniform random partitions of Q having N parts.  
   # Arguments:
   #   part : a list to hold the partition
-  #   q : The total sum of the partition
+  #   q : the total sum of the partition
   #   D : a dictionary for the number of partitions of Q having N or less
   #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
   #   rand_int : 
@@ -243,12 +243,12 @@ top_down = function(part, q, D, rand_int, use_c, use_dict) {
   # Top down method of generating uniform random partitions of Q having N parts.  
   # Arguments:
   #   part : a list to hold the partition
-  #   q : The total sum of the partition
+  #   q : the total sum of the partition
   #   D : a dictionary for the number of partitions of Q having N or less
   #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
   #   rand_int : 
   #   use_c : boolean if TRUE then compiled c code is used
-  while (q > 1) {
+  while (q > 0) {
     if (!is.null(part)) {
       x = min(part)
     }  
@@ -267,13 +267,6 @@ top_down = function(part, q, D, rand_int, use_c, use_dict) {
     rand_int = rand_int - count
     part = c(part, k)
     q = q - k
-    if (q == 1) {
-      part = c(part, 1)
-      break
-    }  
-    if (q <= 0) {
-      break
-    }
   }
   part = conjugate(part, use_c)
   return(part)
@@ -285,7 +278,7 @@ divide_and_conquer = function(part, q, N, D, rand_int, use_c, use_dict) {
   # having N parts.
   # Arguments:
   #   part : a list to hold the partition
-  #   q : The total sum of the partition
+  #   q : the total sum of the partition
   #   N : Number of parts to sum over
   #   D : a dictionary for the number of partitions of Q having N or less
   #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
@@ -353,7 +346,7 @@ multiplicity =  function(part, q, D, rand_int, use_c, use_dict){
   # parts.
   # Arguments:
   #   part : a list to hold the partition
-  #   q : The total sum of the partition
+  #   q : the total sum of the partition
   #   D : a dictionary for the number of partitions of Q having N or less
   #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
   #   rand_int : 
