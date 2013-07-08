@@ -175,7 +175,7 @@ def bottom_up(part, q, D, rand_int):
     
     Arguments:
         part : a list to hold the partition
-        q : The total sum of the partition
+        q : the total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
         rand_int : 
@@ -206,7 +206,7 @@ def top_down(part, q, D, rand_int):
     
     Arguments:
         part : a list to hold the partition
-        q : The total sum of the partition
+        q : the total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
         rand_int : 
@@ -227,7 +227,6 @@ def top_down(part, q, D, rand_int):
         rand_int -= count
         part.append(k)
         q -= k
-        
     part = conjugate(part)
     return(part)
 
@@ -239,7 +238,7 @@ def divide_and_conquer(part, q, N, D, rand_int):
         
     Arguments:
         part : a list to hold the partition
-        q : The total sum of the partition
+        q : the total sum of the partition
         N : Number of parts to sum over
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
@@ -309,7 +308,7 @@ def multiplicity(part, q, D, rand_int):
     
     Arguments:
         part : a list to hold the partition
-        q : The total sum of the partition
+        q : the total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).        
         rand_int : 
