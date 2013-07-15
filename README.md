@@ -1,6 +1,15 @@
 partitions--Code for integer partitioning
 =========================================
 
+The code in this repository is focused on the integer partitioning problem of randomly partitioning
+some total Q into N parts. These functions solve the main computational challenge of Locey and White (2013)
+and extend the 'feasible set' approach based on integer partitioning to several ecological patterns and 
+other distributions. 
+
+
+Algorithms were derived by Ken Locey, coded into Python by Ken Locey,
+and coded into R by Dan McGlinn.
+
 Files & Folders
 ---------------
 
