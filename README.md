@@ -8,7 +8,8 @@ other distributions.
 
 
 Algorithms were derived by Ken Locey, coded into Python by Ken Locey,
-and coded into R by Dan McGlinn.
+and coded into R by Dan McGlinn. Ken Locey and Dan McGlinn both work to improve the readability
+and organization of the code.
 
 Files & Folders
 ---------------
