@@ -195,6 +195,11 @@ get_SAR = function(psp, grains, mv_window=FALSE)
 
 get_SSAD = function(comms)
 {
+  if (is.character(comms[1,1])) {
+    tmp_comms = matrix(as.numeric(comms), nrow=nrow(comms), ncol=ncol(comms))
+    colnames(tmp_comms) = colnames(comms)
+    comms = tmp_comms
+  }  
   grains = unique(comms[ , 1])
   for (g in seq_along(grains)) {
     tmp_comm = comms[comms[ , 1] == grains[g], -(1:3)]
@@ -212,6 +217,11 @@ get_SSAD = function(comms)
 
 get_OFD = function(comms)
 {
+  if (is.character(comms[1,1])) {
+    tmp_comms = matrix(as.numeric(comms), nrow=nrow(comms), ncol=ncol(comms))
+    colnames(tmp_comms) = colnames(comms)
+    comms = tmp_comms
+  }  
   grains = unique(comms[ , 1])
   for (g in seq_along(grains)) {
     tmp_comm = (comms[comms[ , 1] == grains[g], -(1:3)] > 0) * 1
