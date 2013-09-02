@@ -27,17 +27,26 @@ sad = sort(table(dat$spnum), dec=T)
 write.table(matrix(sad, nrow=1), file='./data/bci_sad.csv',
             sep=',', row.names=FALSE, col.names=FALSE)
 
-## generate bci community matrix at the 64 m2 scale
-i_bisections = 13
+
+## generate bci community matrix at several different grains
+i_bisections = seq(5, 13, 2)
 n_quadrats = 2^i_bisections
 domain = c(0,1000,0,500) # spatial domain in meters defined here
-
 comm = make_comm_matrix(dat$spnum, S, cbind(dat$gx, dat$gy), n_quadrats, domain)
 write.csv(comm, file='./data/bci_comm.csv', row.names=FALSE)
 
 ## compute SSADs
-ssad = get_SSAD(comm)
-write.csv(ssad, file='./data/bci_ssad.csv', row.names=FALSE)
+## find which species has the max abu
+for (i in i_bisections){
+  true = comm[ , 1] == round((1e3 * 5e2) / 2^i, 2)
+  ssad = get_SSAD(comm[true, ])
+  #max_abu = max(colSums(comm[ , -(1:3)]))
+  #sp_max = which(colSums(comm[ , -(1:3)]) == max_abu)
+  #ssad = ssad[ , c(1:2, sp_max + 2)]
+  write.csv(ssad, file=paste('./data/bci_ssad_', i,'.csv', sep=''),
+            row.names=FALSE)
+}
+
 
 ## compute OFD
 ofd = get_OFD(comm)
