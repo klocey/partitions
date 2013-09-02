@@ -54,7 +54,7 @@ make_comm_matrix = function(spnum, S, coords, n_quadrats, domain, abu = NULL,
         inQuad =  xbreaks[x] <= coords[ , 1] & coords[ , 1] < xbreaks[x + 1] & 
           ybreaks[y] <= coords[ , 2] & coords[ , 2] < ybreaks[y + 1]
         if (is.null(grainSuffix)) {
-          comms[irow, c(1:3)] = c(paste(round(xlengths[i] * ylengths[i], 2), sep=''),
+          comms[irow, c(1:3)] = c(as.numeric(paste(round(xlengths[i] * ylengths[i], 2), sep='')),
                                   x, y)
         }
         else {
