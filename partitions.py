@@ -10,8 +10,7 @@ import math
 import itertools
 
 
-""" 
-    Functions for integer partitioning. Most apply to using integer partitioning
+""" Functions for integer partitioning. Most apply to using integer partitioning
     to examine distributions of wealth and abundance using the feasible set. The
     feasible set is the set all forms of the distribution having the same
     constraint values (e.g. total abundance N, species richness S).
