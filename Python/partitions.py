@@ -1,7 +1,5 @@
 #!/usr/bin/env sage -python
 
-#!/usr/bin/python
-
 import sys
 import numpy as np
 from scipy import stats
@@ -12,8 +10,7 @@ import math
 import itertools
 
 
-""" 
-    Functions for integer partitioning. Most apply to using integer partitioning
+""" Functions for integer partitioning. Most apply to using integer partitioning
     to examine distributions of wealth and abundance using the feasible set. The
     feasible set is the set all forms of the distribution having the same
     constraint values (e.g. total abundance N, species richness S).
@@ -49,8 +46,7 @@ import itertools
 
 
 def P(D, q, k):
-    """
-    number of partitions of q with k or less parts (or having k or less as the
+    """ number of partitions of q with k or less parts (or having k or less as the
     largest part), i.e. P(q + k, k).
     Arguments:
         D : a dictionary for the number of partitions of Q having N or less
@@ -65,8 +61,7 @@ def P(D, q, k):
 
 
 def numparts_QNK(QNK, Q, N, K):
-    """
-    number of partitions of Q with N parts having K or less as the largest part.
+    """ number of partitions of Q with N parts having K or less as the largest part.
     Arguments:
         QNK : a dictionary for the number of partitions of Q having N parts with
               K or less as the largest part
@@ -80,8 +75,7 @@ def numparts_QNK(QNK, Q, N, K):
 
 
 def conjugate(part):
-    """
-    Find the conjugate of an integer partition. Recoded (on 24-Apr-2013) from
+    """ Find the conjugate of an integer partition. Recoded (on 24-Apr-2013) from
     the Sage source code: www.sagenb.org/src/combinat/partition.py
     
     """
@@ -162,8 +156,7 @@ def rand_parts(Q, N, sample_size, method, D={}, zeros=False):
     part = []
     parts = []
     numparts = 0
-    """
-    Generate uniform random partitions of Q having N parts.
+    """ Generate uniform random partitions of Q having N parts.
     
     Arguments:
         Q : Total sum across parts
@@ -234,8 +227,7 @@ def rand_parts(Q, N, sample_size, method, D={}, zeros=False):
 
 
 def bottom_up(part, q, D, rand_int):
-    """
-    Bottom up method of generating uniform random partitions of Q having N parts.
+    """ Bottom up method of generating uniform random partitions of Q having N parts.
     
     Arguments:
         part : a list to hold the partition
@@ -265,8 +257,7 @@ def bottom_up(part, q, D, rand_int):
 
 
 def top_down(part, q, D, rand_int):
-    """
-    Top down method of generating uniform random partitions of Q having N parts.
+    """ Top down method of generating uniform random partitions of Q having N parts.
     
     Arguments:
         part : a list to hold the partition
@@ -296,8 +287,7 @@ def top_down(part, q, D, rand_int):
 
 
 def divide_and_conquer(part, q, N, D, rand_int):
-    """
-    Divide and conquer method of generating uniform random partitions of Q
+    """ Divide and conquer method of generating uniform random partitions of Q
     having N parts.
         
     Arguments:
@@ -335,8 +325,7 @@ def divide_and_conquer(part, q, N, D, rand_int):
 
 
 def get_multiplicity(q, k, D, rand_int, count): 
-    """ 
-    Find the number of times a value k occurs in a partition that is being
+    """ Find the number of times a value k occurs in a partition that is being
     generated at random by the multiplicity() function. The resulting
     multiplicity is then passed back to the multiplicity() function along with
     an updated value of count and an updated dictionary D
@@ -366,8 +355,7 @@ def get_multiplicity(q, k, D, rand_int, count):
 
 
 def multiplicity(part, q, D, rand_int):
-    """
-    multiplicity method of generating uniform random partitions of Q having N
+    """ multiplicity method of generating uniform random partitions of Q having N
     parts.
     
     Arguments:
