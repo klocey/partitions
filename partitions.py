@@ -1,38 +1,4 @@
-""""Functions for integer partitioning
-
-Most apply to using integer partitioning to examine distributions of wealth and
-abundance using the feasible set. The feasible set is the set all forms of the
-distribution having the same constraint values (e.g. total abundance N, species
-richness S).
-
-Included functions:
-- conjugate(): get the conjugate of an integer partition (recoded from Sage,
-  see below)
-- NrParts(): Find the number of partitions for a given total N and number of
-  parts S (modified and recoded from GAP, see below)
-
-Five functions to generate uniform random integer partitions of Q having N
-parts.  Each allows the option to have partitions with zero values.
-- bottom_up(): Starts at smallest possible value of the largest possible
-  part (K)
-- divide_and_conquer(): Start at random points in the feasible set
-- top_down(): Starts at largest possible value of the largest possible part
-  (K)
-- multiplicity(): uses the top_down approach but builds the partition using
-  multiplicities (i.e. multiples of parts)
-- best(): Calls one of the above functions depending on the value of Q and
-  Q / N (restricted to bottom_up and divide_and_conquer for now)
-
-Four partitioning functions not provided in other softwares
-- most_even_partition(): Get the last lexical (i.e. most even) partition of
-  Q having N parts (no zeros)
-- min_max(): Get the smallest possible maximum part a partition of Q having
-  N parts (no zeros)
-- firstpart(): Get the first lexical partition of Q having N parts with k as
-  the largest part (no zeros)
-- next_restricted_part(): Get the next lexical partition of Q having N parts
-
-"""
+#!/usr/bin/env sage -python
 
 import sys
 import numpy as np
@@ -44,10 +10,45 @@ import math
 import itertools
 
 
-def P(D, q, k):
-    """Number of partitions of q with k or less parts
+""" 
+    Functions for integer partitioning. Most apply to using integer partitioning
+    to examine distributions of wealth and abundance using the feasible set. The
+    feasible set is the set all forms of the distribution having the same
+    constraint values (e.g. total abundance N, species richness S).
+    
+    Included functions:
+    - conjugate(): get the conjugate of an integer partition (recoded from Sage,
+      see below)
+    - NrParts(): Find the number of partitions for a given total N and number of
+      parts S (modified and recoded from GAP, see below)
+    
+    Five functions to generate uniform random integer partitions of Q having N
+    parts.  Each allows the option to have partitions with zero values.
+    - bottom_up(): Starts at smallest possible value of the largest possible
+      part (K) 
+    - divide_and_conquer(): Start at random points in the feasible set
+    - top_down(): Starts at largest possible value of the largest possible part
+      (K) 
+    - multiplicity(): uses the top_down approach but builds the partition using
+      multiplicities (i.e. multiples of parts)
+    - best(): Calls one of the above functions depending on the value of Q and
+      Q / N (restricted to bottom_up and divide_and_conquer for now)
 
-    (or having k or less as the largest part), i.e. P(q + k, k).
+    Four partitioning functions not provided in other softwares
+    - most_even_partition(): Get the last lexical (i.e. most even) partition of
+      Q having N parts (no zeros)
+    - min_max(): Get the smallest possible maximum part a partition of Q having
+      N parts (no zeros)
+    - firstpart(): Get the first lexical partition of Q having N parts with k as
+      the largest part (no zeros)
+    - next_restricted_part(): Get the next lexical partition of Q having N parts
+    
+"""
+
+
+def P(D, q, k):
+    """ number of partitions of q with k or less parts (or having k or less as the
+    largest part), i.e. P(q + k, k).
     Arguments:
         D : a dictionary for the number of partitions of Q having N or less
             parts (or N or less as the largest part), i.e. P(Q, Q + N).   
@@ -60,10 +61,22 @@ def P(D, q, k):
     return [D, D[(q, k)]] # return the updated dictionary and P(q + k, k).
 
 
-def conjugate(part):
-    """Find the conjugate of an integer partition.
+def numparts_QNK(QNK, Q, N, K):
+    """ number of partitions of Q with N parts having K or less as the largest part.
+    Arguments:
+        QNK : a dictionary for the number of partitions of Q having N parts with
+              K or less as the largest part
+    """
+    if Q > N*K or K <= 0: return 0
+    if Q == N*K: return 1
+    if (Q,N,K) not in QNK:
+      QNK[(Q,N,K)] = sum(numparts_QNK(QNK, Q-i*K, N-i, K-1) for i in xrange(N))
+    return QNK[(Q,N,K)] # number of partitions of n with s parts having x or less as the largest part
 
-    Recoded (on 24-Apr-2013) from
+
+
+def conjugate(part):
+    """ Find the conjugate of an integer partition. Recoded (on 24-Apr-2013) from
     the Sage source code: www.sagenb.org/src/combinat/partition.py
     
     """
@@ -78,39 +91,73 @@ def conjugate(part):
         return conj
 
 
-def NrParts(*arg):
-    """Find the number of partition for a given total Q and number of parts N.
-
-    Recoded on 24-Apr-2013 and modified from GAP source code: www.gap-system.org
-    Note: p(Q) = p(Q + Q, Q) thus NrParts(Q) returns the same value as NrParts
-    (Q + Q, Q)
+def NrParts(*args):
+    """ Proposition 1: number of partitions of N+k having k parts is equal to 1.) the number partitions of N having k or less as the largest part, and 2.) the number of partitions of N having k
+        or less parts
+        Proposition 2: The number of partitions of N having S parts is equal to the number of partitions of N-S, if S > N/2 (odd) or if S >= N/2 (even)  """
     
-    Arguments:
-    *arg : either Q or Q and N
     
-    """
-
-    if len(arg) == 1:  # using p(Q) = p(Q + Q, Q)
-        Q = arg[0] * 2
-        N = arg[0]
-    elif len(arg) == 2:    
-        Q = arg[0]
-        N = arg[1]
+    """ Find the number of partition for a given total Q and number of parts N. Recoded
+        (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org
+        
+        Note: p(Q) = p(Q+Q,Q) ...so NrParts(Q) returns the same value as NrParts(Q+Q,Q)
+        ...wish I would've realized that before translating the block below 'if len(arg)==1:'
+        from GAP source code. Well, now there's two ways to get p(Q). """
+    
     parts = 0
-    if Q == N or N == 1:
-        parts = 1
-    elif Q < N or N == 0:
-        parts = 0
-    else:
-        p = [1] * Q
-        for i in range(2, N + 1):  
-            for m  in range(i + 1, Q - i + 1 + 1):
-                p[m] = p[m] + p[m - i]
-        parts = p[Q - N + 1]
-    return parts
+    
+    if len(args) == 2: # Can we use proposition 2?
+        Q = args[0]
+        N = args[1]
+        if N >= Q/2.0:
+            args = [Q-N]
+        
+    if len(args) == 1: # if we're finding p(N)
+        Q = args[0]
+        parts = 1                             # p(0) = 1
+        p = [1]*(Q+1)
+        for i in range(1,Q+1):
+            parts = 0
+            k = 1
+            l = 1                         # k*(3*k-1)/2
+            while 0 <= i-(l+k):
+                parts = parts - (-1)**k * (p[i-l] + p[i-(l+k)])
+                k = k + 1
+                l = l + 3*k - 2
+            
+            if 0 <= i-l:
+                parts = parts - (-1)**k * p[i-l]
+            p[i] = parts
+    
+    elif len(args) == 2:    
+        Q = args[0]
+        N = args[1]
+        parts=0
+        if Q == N or N == 1:
+            parts = 1
+        elif Q < N or N == 0:
+            parts = 0
+        else:
+            q = int(Q)
+            k = int(N)
+            p = [1]*q
+        
+            for i in range(2,k+1):  
+                for m  in range(i+1,q-i+1+1):
+                    p[m] = p[m] + p[m-i]
+            
+            parts = p[q-k+1]
+    
+    return parts;
+    
 
-def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
-    """Generate uniform random partitions of Q having N parts.
+def rand_parts(Q, N, sample_size, method, D={}, zeros=False):
+    
+    q = 0
+    part = []
+    parts = []
+    numparts = 0
+    """ Generate uniform random partitions of Q having N parts.
     
     Arguments:
         Q : Total sum across parts
@@ -132,21 +179,38 @@ def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
         fastest method to compute the partition.
     
     """
-    parts = []
     if zeros:
-        Plist = P(D, Q, N)    
-    else:
-        Plist = P(D, Q - N, N)
-    D = Plist[0]
-    numparts = Plist[1]        
+    
+        """ if zeros are allowed, then we must ask whether Q >= N. if not, then
+            the total Q is partitioned among a greater number of parts than there
+            are, say, individuals. In which case, some parts must be zero. A random
+            partition would then be any random partition of Q with zeros appended
+            at the end. But, if Q >= N, then Q is partitioned among less number of
+            parts than there are individuals. In which case, a random partition
+            would be any random partition of Q having N or less parts. """  
+        
+        if Q >= N:
+            # if Q >= N and zero's are allowed, the first part must be equal to or less than N
+            numparts = NrParts(Q+N, N) # number of partitions of Q with N or less as the first part
+            
+        elif Q < N:
+            # if Q < N and zero's are allowed, the first part must be equal to or less than Q
+            numparts = NrParts(Q) # number of partitions of Q   
+        
+    else: # if zero's are not allowed, then Q > N, and the first part must be N.
+        numparts = NrParts(Q, N) # the number of partitions of Q - N having N or less as the first part 
+        
     while len(parts) < sample_size:
+        
         rand_int = random.randrange(1, numparts + 1)
+        
         if zeros:
             q = int(Q)
             part = []
         else:
             q = int(Q - N)
             part = [N]
+        
         if method == 'bottom_up':
             part = bottom_up(part, q, D, rand_int)
         if method == 'top_down':
@@ -155,11 +219,7 @@ def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
             part = divide_and_conquer(part, q, N, D, rand_int)
         if method == 'multiplicity':
             part = multiplicity(part, q, D, rand_int)
-        if method == 'best':
-            if Q < 250 or N >= Q / 1.5:
-                part = bottom_up(part, q, D, rand_int)
-            else:
-                part = divide_and_conquer(part, q, N, D, rand_int)
+        
         if zeros:
             Zs = [0] * (N - len(part))
             part.extend(Zs)
@@ -168,14 +228,14 @@ def rand_parts(Q, N, sample_size, method='best', D={}, zeros=False):
 
 
 def bottom_up(part, q, D, rand_int):
-    """Bottom up method of generating uniform random partitions of Q having N parts.
+    """ Bottom up method of generating uniform random partitions of Q having N parts.
     
     Arguments:
         part : a list to hold the partition
         q : the total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
-            parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        rand_int : 
+            parts (or N or less as the largest part), i.e. P(Q + N, N).        
+        rand_int : a number representing a member of the feasible set
 
     """    
     while q > 0:
@@ -198,14 +258,14 @@ def bottom_up(part, q, D, rand_int):
 
 
 def top_down(part, q, D, rand_int):
-    """Top down method of generating uniform random partitions of Q having N parts.
+    """ Top down method of generating uniform random partitions of Q having N parts.
     
     Arguments:
         part : a list to hold the partition
         q : the total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
-            parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        rand_int : 
+            parts (or N or less as the largest part), i.e. P(Q + N, N).        
+        rand_int : a number representing a member of the feasible set
 
     """    
     while q > 0:
@@ -228,7 +288,7 @@ def top_down(part, q, D, rand_int):
 
 
 def divide_and_conquer(part, q, N, D, rand_int):
-    """Divide and conquer method of generating uniform random partitions of Q
+    """ Divide and conquer method of generating uniform random partitions of Q
     having N parts.
         
     Arguments:
@@ -236,8 +296,8 @@ def divide_and_conquer(part, q, N, D, rand_int):
         q : the total sum of the partition
         N : Number of parts to sum over
         D : a dictionary for the number of partitions of Q having N or less
-            parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        rand_int : 
+            parts (or N or less as the largest part), i.e. P(Q + N, N).        
+        rand_int : a number representing a member of the feasible set
 
     """
     max_int = int(N)
@@ -266,20 +326,19 @@ def divide_and_conquer(part, q, N, D, rand_int):
 
 
 def get_multiplicity(q, k, D, rand_int, count): 
-    """Find the number of times a value k occurs in a partition that is being
-    generated at random by the multiplicity() function.
-
-    The resulting multiplicity is then passed back to the multiplicity()
-    function along with an updated value of count and an updated dictionary D
+    """ Find the number of times a value k occurs in a partition that is being
+    generated at random by the multiplicity() function. The resulting
+    multiplicity is then passed back to the multiplicity() function along with
+    an updated value of count and an updated dictionary D
     
     Arguments:
         q : 
         k : 
         D : a dictionary for the number of partitions of Q having N or less
-            parts (or N or less as the largest part), i.e. P(Q, Q + N).                
-        rand_int :
+            parts (or N or less as the largest part), i.e. P(Q + N, N).                
+        rand_int : a number representing a member of the feasible set
         count : count < rand_int
-
+    
     """
     
     multi = [] # the multiplicity 
@@ -297,15 +356,15 @@ def get_multiplicity(q, k, D, rand_int, count):
 
 
 def multiplicity(part, q, D, rand_int):
-    """Multiplicity method of generating uniform random partitions of Q having N
+    """ multiplicity method of generating uniform random partitions of Q having N
     parts.
     
     Arguments:
         part : a list to hold the partition
         q : the total sum of the partition
         D : a dictionary for the number of partitions of Q having N or less
-            parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-        rand_int : 
+            parts (or N or less as the largest part), i.e. P(Q + N, N).        
+        rand_int : a number representing a member of the feasible set
 
     """
     while q > 0:
@@ -337,7 +396,7 @@ def multiplicity(part, q, D, rand_int):
 
         
 def most_even_partition(Q, N):
-    """Find the last lexical (i.e. most even) partition of Q having N parts."""
+    """ Find the last lexical (i.e. most even) partition of Q having N parts """
     
     most_even = [int(math.floor(float(Q) / float(N)))] * N
     _remainder = int(Q % N)
@@ -350,7 +409,7 @@ def most_even_partition(Q, N):
 
 
 def min_max(Q, N):
-    """Find the smallest possible maximum part a partition of Q having N parts."""
+    """ Find the smallest possible maximum part a partition of Q having N parts """
     
     min_int = int(math.floor(float(Q) / float(N)))
     if int(Q % N) > 0:
@@ -359,7 +418,7 @@ def min_max(Q, N):
 
     
 def firstpart(Q, N, k):
-    """Find the first lexical partition of Q having N parts with k as the largest part."""
+    """ Find the first lexical partition of Q having N parts with k as the largest part """
     
     part = []
     if k == None:
@@ -385,7 +444,7 @@ def firstpart(Q, N, k):
 
 
 def next_restricted_part(p):
-    """Find the next lexical partition of Q having N parts."""
+    """ Find the next lexical partition of Q having N parts """
     
     Q = sum(p)
     N = len(p)
@@ -403,3 +462,43 @@ def next_restricted_part(p):
                 h2 = list(parts[1])
                 next = list(firstpart(int(sum(h2)), int(len(h2)), int(h2[0]) - 1))
                 return h1 + next
+                
+                
+def central_tendency(partitions):
+    """ Find the partition in a random sample with the greatest average commonness 
+        among its ranked abundance states. This partition is taken to represent the 
+        central tendency, i.e. average member, of the set. """
+    
+    #print len(partitions)
+    
+    #if len(partitions) > 500:
+    #    partitions = random.sample(partitions,500)
+    
+
+    N = sum(partitions[0])
+    S = len(partitions[0])
+    a1 = 0 # member mean
+    v1 = 0 # member variance
+    for partition in partitions:
+        in_common = []
+        ct1 = 0
+        for a in partition: # for each rank
+            c = 0
+            for member in partitions: 
+                if a == member[ct1]:
+                    c += 1
+            in_common.append(np.log(c))
+            ct1 += 1
+        a2 = np.mean(in_common)
+        v2 = np.var(in_common)  
+        if a2 > a1:
+            a1 = a2
+            v1 = v2
+            xpartition = partition
+        elif a2 == a1:
+            if v2 < v1:
+                a1 = a2
+                v1 = v2
+                xpartition = partition
+    #percentile_evar = stats.percentileofscore(sample_evar,obs_evar)
+    return xpartition
