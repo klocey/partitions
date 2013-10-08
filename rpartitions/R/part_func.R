@@ -1,62 +1,34 @@
-# Functions for integer partitioning. Most apply to using integer partitioning
-# to examine distributions of wealth and abundance using the feasible set. The
-# feasible set is the set all forms of the distribution having the same
-# constraint values (e.g. total abundance N, species richness S).
-# 
-# Included functions:
-# - conjugate(): get the conjugate of an integer partition (recoded from Sage,
-#   see below)
-# - NrParts(): Find the number of partitions for a given total N and number of
-#   parts S (modified and recoded from GAP, see below)
-# 
-# Five functions to generate uniform random integer partitions of Q having N
-# parts.  Each allows the option to have partitions with zero values.
-# - bottom_up(): Starts at smallest possible value of the largest possible
-#   part (K) 
-# - divide_and_conquer(): Start at random points in the feasible set
-# - top_down(): Starts at largest possible value of the largest possible part
-#   (K) 
-# - multiplicity(): uses the top_down approach but builds the partition using
-#   multiplicities (i.e. multiples of parts)
-# - best(): Calls one of the above functions depending on the value of Q and
-#   Q / N (restricted to bottom_up and divide_and_conquer for now)
-# 
-# Four partitioning functions not provided in other softwares
-# - most_even_partition(): Get the last lexical (i.e. most even) partition of
-#   Q having N parts (no zeros)
-# - min_max(): Get the smallest possible maximum part a partition of Q having
-#   N parts (no zeros)
-# - firstpart(): Get the first lexical partition of Q having N parts with k as
-#   the largest part (no zeros)
-# - next_restricted_part(): Get the next lexical partition of Q having N parts
-##
-library(hash)
-
-load_c = function(...) {
-  if (!is.loaded("NrParts")) {
-    OS = Sys.info()['sysname']
-    if (OS == 'Linux')
-      dyn.load('partitions.so')
-    if (OS == 'Windows')
-      dyn.load('partitions.dll')
-  }
-}
-
+#' Generate a random integer between two integers
+#'
+#' @param min minimum value 
+#' @param max maximum value
+#' @export
+#' @examples
+#' get_rand_int(min=0, max=10)
 get_rand_int = function(min=0, max=1) {
   int = ceiling(runif(1, min - 1, max))
   return(int)
 }
 
+#' Returns the last element of a vector
+#' 
+#' @param x a vector
+#' @export
+#' @examples
+#' last(1:10)
+#' last(letters[1:10])
 last = function(x) { tail(x, n = 1) }
 
+#' Number of partitions of q with k or less parts (or having k or less as the
+#' largest part), i.e. P(q+k,k).
+#' 
+#' @param D lookup table for numbers of partitions, P(q+k,k) values. 
+#' @param q total sum of the set
+#' @param use_c logical, if TRUE the number of partitions is computed in c
+#' @export
+#' @examples
+#' P(list(), 100, 10, FALSE, FALSE)
 P = function(D, q, k, use_c, use_dict) {
-  # number of partitions of q with k or less parts (or having k or less as the
-  # largest part), i.e. P(q+k,k).
-  # Arguments:
-  #   D : lookup table for numbers of partitions, P(q+k,k) values. 
-  #   q : total sum of the set
-  #   k : number of parts
-  #   use_c : logical, if TRUE the number of partitions is computed in c
   if (use_dict) {
     key = paste(q, k, sep=',')
     if (!has.key(key, D)) {
@@ -71,14 +43,16 @@ P = function(D, q, k, use_c, use_dict) {
   return(out)
 }
 
-
+#' Find the conjugate of an integer partition
+#' Recoded (orginally on 24-Apr-2013) from the Sage source code:
+#' http://www.sagenb.org/src/combinat/partition.py
+#' 
+#' @param part a vector that represents an integer partition
+#' @param use_c logical, defaults to TRUE, the conjugate is computed in c
+#' @export
+#' @examples
+#' conjugate(c(3,3,1,1), F)
 conjugate = function(part, use_c=TRUE){ 
-  # Find the conjugate of an integer partition
-  # Recoded (orginally on 24-Apr-2013) from the Sage source code:
-  # http://www.sagenb.org/src/combinat/partition.py
-  # Arguments:
-  # part : a vector that represents an integer partition
-  # use_c : default is TRUE, the conjugate is computed in c
   if (is.null(part)) {
     conj = NULL
   }  
@@ -100,14 +74,13 @@ conjugate = function(part, use_c=TRUE){
   return(conj)
 }
 
-
+#' Find the number of partition for a given total Q and number of parts N.
+#' Recoded (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org
+#'
+#' @param Q Total sum
+#' @param N Number of items to sum across
+#' @param use_c logical, defaults to TRUE, the number of partitions is computed in c  
 NrParts = function(Q, N=NULL, use_c=TRUE){ 
-  # Find the number of partition for a given total Q and number of parts N.
-  # Recoded (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org
-  # Arguments:
-  #   Q : Total sum
-  #   N : Number of items to sum across
-  #   use_c : default is TRUE, the number of partitions is computed in c  
   if (is.null(N)) {  # using p(Q) = p(Q + Q, Q)
     N = Q
     Q = Q * 2
@@ -137,28 +110,26 @@ NrParts = function(Q, N=NULL, use_c=TRUE){
 }
 
 
+#' Generate uniform random partitions of Q having N parts.
+#'
+#' @param Q Total sum across parts
+#' @param N : Number of parts to sum over
+#' @param sample_size : number of random partitions to generate
+#' @param method : method to use for generating the partition, options include:
+#'       'bottom_up', 'top_down', 'divide_and_conquer', 'multiplicity', and
+#'       'best'. Defaults to 'best'
+#' @param D : a dictionary for the number of partitions of Q having N or less
+#'        parts (or N or less as the largest part), i.e. P(Q, Q + N). Defaults
+#'        to a blank dictionary.
+#' @param zeros : boolean if True partitions can have zero values, if False
+#'        partitions have only positive values, defaults to False
+#' @param use_c : boolean if TRUE then compiled c code is used, defaults to TRUE
+#' @param use_dict : boolean, if TRUE then a hash table is used, defaults to FALSE
+#' @return A matrix where each column is a random partition
+#' @note method == 'best' attempts to use the values of Q and N to infer what the 
+#'         fastest method to compute the partition.
 rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
                       use_c=TRUE, use_dict=FALSE) {
-  # Generate uniform random partitions of Q having N parts.
-  # Arguments:
-  #   Q : Total sum across parts
-  #   N : Number of parts to sum over
-  #   sample_size : number of random partitions to generate
-  #   method : method to use for generating the partition, options include:
-  #     'bottom_up', 'top_down', 'divide_and_conquer', 'multiplicity', and
-  #     'best'. Defaults to 'best'
-  #   D : a dictionary for the number of partitions of Q having N or less
-  #     parts (or N or less as the largest part), i.e. P(Q, Q + N). Defaults
-  #     to a blank dictionary.
-  #   zeros : boolean if True partitions can have zero values, if False
-  #     partitions have only positive values, defaults to False
-  #   use_c : boolean if TRUE then compiled c code is used, defaults to TRUE
-  #   use_dict : boolean, if TRUE then a hash table is used, defaults to FALSE
-  # Returns:
-  #   A matrix where each column is a random partition
-  # Notes:
-  # method == 'best' attempts to use the values of Q and N to infer what the 
-  # fastest method to compute the partition.
   parts= matrix(NA, ncol=sample_size, nrow=N)
   if (zeros) {
     Plist = P(D, Q, N, use_c, use_dict)
@@ -207,15 +178,16 @@ rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
   return(parts)
 }
 
+#' Bottom up method of generating uniform random partitions of Q having N parts.  
+#'
+#' @param part a list to hold the partition
+#' @param q the total sum of the partition
+#' @param D a dictionary for the number of partitions of Q having N or less
+#'   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+#' @pram rand_int the random integer
+#' @param use_c boolean if TRUE then compiled c code is used
+#' @param use_dict boolean, if TRUE then hash dictionary is used
 bottom_up = function(part, q, D, rand_int, use_c, use_dict) {
-  # Bottom up method of generating uniform random partitions of Q having N parts.  
-  # Arguments:
-  #   part : a list to hold the partition
-  #   q : the total sum of the partition
-  #   D : a dictionary for the number of partitions of Q having N or less
-  #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-  #   rand_int : 
-  #   use_c : boolean if TRUE then compiled c code is used
   while (q > 0) {
     for (k in 1:q) {
       Plist = P(D, q, k, use_c, use_dict)
@@ -239,15 +211,15 @@ bottom_up = function(part, q, D, rand_int, use_c, use_dict) {
   return(part)
 }
 
+#' Top down method of generating uniform random partitions of Q having N parts.  
+#' 
+#' @param part a list to hold the partition
+#' @param q the total sum of the partition
+#' @param D a dictionary for the number of partitions of Q having N or less
+#'   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+#' @param rand_int 
+#' @param use_c boolean if TRUE then compiled c code is used
 top_down = function(part, q, D, rand_int, use_c, use_dict) {
-  # Top down method of generating uniform random partitions of Q having N parts.  
-  # Arguments:
-  #   part : a list to hold the partition
-  #   q : the total sum of the partition
-  #   D : a dictionary for the number of partitions of Q having N or less
-  #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-  #   rand_int : 
-  #   use_c : boolean if TRUE then compiled c code is used
   while (q > 0) {
     if (!is.null(part)) {
       x = min(part)
