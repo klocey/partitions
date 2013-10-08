@@ -1,0 +1,14 @@
+bibentry("Manual",
+   title = "rpartitions: code for integer partitioning",
+   author = c(person("Ken", "Locey", role = "aut", comment = "Python orginal"),
+              person("Daniel", "McGlinn", role = c("aut", "trl", "cre"),
+                comment = "R port, author of parallel support", 
+                email = "danmcglinn@gmail.com")),
+   organization = "Weecology",
+   address      = "Logan, UT",
+   year   = "2012",
+   note   = "R package version 0.1",
+   url    = "https://github.com/klocey/partitions",
+
+   mheader = "To cite rpartitions in publications use:"
+)
