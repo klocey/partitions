@@ -10,6 +10,7 @@ get_rand_int = function(min=0, max=1) {
   return(int)
 }
 
+
 #' Returns the last element of a vector
 #' 
 #' @param x a vector
@@ -18,6 +19,7 @@ get_rand_int = function(min=0, max=1) {
 #' last(1:10)
 #' last(letters[1:10])
 last = function(x) { tail(x, n = 1) }
+
 
 #' Number of partitions of q with k or less parts (or having k or less as the
 #' largest part), i.e. P(q+k,k).
@@ -43,6 +45,7 @@ P = function(D, q, k, use_c, use_dict) {
   return(out)
 }
 
+
 #' Find the conjugate of an integer partition
 #' Recoded (orginally on 24-Apr-2013) from the Sage source code:
 #' http://www.sagenb.org/src/combinat/partition.py
@@ -50,6 +53,7 @@ P = function(D, q, k, use_c, use_dict) {
 #' @param part a vector that represents an integer partition
 #' @param use_c logical, defaults to TRUE, the conjugate is computed in c
 #' @export
+#' @useDynLib 'rpartitions'
 #' @examples
 #' conjugate(c(3,3,1,1), F)
 conjugate = function(part, use_c=TRUE){ 
@@ -74,12 +78,17 @@ conjugate = function(part, use_c=TRUE){
   return(conj)
 }
 
-#' Find the number of partition for a given total Q and number of parts N.
-#' Recoded (on 24-Apr-2013) and modified from GAP source code: www.gap-system.org
+
+#' Find the number of partitions for a given total Q and number of parts N.
+#' Recoded and modified from GAP source code: www.gap-system.org
 #'
 #' @param Q Total sum
 #' @param N Number of items to sum across
 #' @param use_c logical, defaults to TRUE, the number of partitions is computed in c  
+#' @export 
+#' @useDynLib 'rpartitions'
+#' @examples
+#' NrParts(100, 10)
 NrParts = function(Q, N=NULL, use_c=TRUE){ 
   if (is.null(N)) {  # using p(Q) = p(Q + Q, Q)
     N = Q
@@ -128,6 +137,9 @@ NrParts = function(Q, N=NULL, use_c=TRUE){
 #' @return A matrix where each column is a random partition
 #' @note method == 'best' attempts to use the values of Q and N to infer what the 
 #'         fastest method to compute the partition.
+#' @export
+#' @examples
+#' rand_parts(100, 10, 5)
 rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
                       use_c=TRUE, use_dict=FALSE) {
   parts= matrix(NA, ncol=sample_size, nrow=N)
@@ -178,15 +190,19 @@ rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
   return(parts)
 }
 
+
 #' Bottom up method of generating uniform random partitions of Q having N parts.  
 #'
 #' @param part a list to hold the partition
 #' @param q the total sum of the partition
 #' @param D a dictionary for the number of partitions of Q having N or less
 #'   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-#' @pram rand_int the random integer
+#' @param rand_int the random integer
 #' @param use_c boolean if TRUE then compiled c code is used
 #' @param use_dict boolean, if TRUE then hash dictionary is used
+#' @export
+#' @examples
+#' bottom_up(c(5, 4), 4, hash(), 1, T, T)
 bottom_up = function(part, q, D, rand_int, use_c, use_dict) {
   while (q > 0) {
     for (k in 1:q) {
@@ -211,14 +227,19 @@ bottom_up = function(part, q, D, rand_int, use_c, use_dict) {
   return(part)
 }
 
+
 #' Top down method of generating uniform random partitions of Q having N parts.  
 #' 
 #' @param part a list to hold the partition
 #' @param q the total sum of the partition
 #' @param D a dictionary for the number of partitions of Q having N or less
 #'   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-#' @param rand_int 
+#' @param rand_int the random integer
 #' @param use_c boolean if TRUE then compiled c code is used
+#' @param use_dict boolean, if TRUE then hash dictionary is used
+#' @export
+#' @examples
+#' top_down(c(5, 4), 4, hash(), 1, T, T)
 top_down = function(part, q, D, rand_int, use_c, use_dict) {
   while (q > 0) {
     if (!is.null(part)) {
@@ -245,18 +266,21 @@ top_down = function(part, q, D, rand_int, use_c, use_dict) {
 }
 
 
+#' Divide and conquer method of generating uniform random partitions of Q
+#' having N parts.
+#'
+#' @param part a list to hold the partition
+#' @param q the total sum of the partition
+#' @param N Number of parts to sum over
+#' @param D a dictionary for the number of partitions of Q having N or less
+#'        parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+#' @param rand_int the random integer
+#' @param use_c boolean if TRUE then compiled c code is used
+#' @param use_dict boolean, if TRUE then hash dictionary is used
+#' @export
+#' @examples
+#' divide_and_conquer(c(5, 4), 4, hash(), 1, T, T)
 divide_and_conquer = function(part, q, N, D, rand_int, use_c, use_dict) {
-  # Divide and conquer method of generating uniform random partitions of Q
-  # having N parts.
-  # Arguments:
-  #   part : a list to hold the partition
-  #   q : the total sum of the partition
-  #   N : Number of parts to sum over
-  #   D : a dictionary for the number of partitions of Q having N or less
-  #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-  #   rand_int : 
-  #   use_c :
-  
   max_int = N
   min_int = 1 
   while (q > 0) {
@@ -284,18 +308,24 @@ divide_and_conquer = function(part, q, N, D, rand_int, use_c, use_dict) {
   return(part)
 }
 
+
+#' Find the number of times a value k occurs in a partition that is being
+#' generated at random by the multiplicity() function. The resulting
+#' multiplicity is then passed back to the multiplicity() function along with
+#' an updated value of count and an updated dictionary D
+#'
+#' @param q 
+#' @param k 
+#' @param D a dictionary for the number of partitions of Q having N or less
+#'        parts (or N or less as the largest part), i.e. P(Q, Q + N).                
+#' @param rand_int the random integer
+#' @param count count < rand_int
+#' @param use_c boolean if TRUE then compiled c code is used
+#' @param use_dict boolean, if TRUE then hash dictionary is used
+#' @export
+#' @examples
+#' get_multiplicity(10, 5, hash(), 3, 2, T, T)
 get_multiplicity = function(q, k, D, rand_int, count, use_c, use_dict){
-  # Find the number of times a value k occurs in a partition that is being
-  # generated at random by the multiplicity() function. The resulting
-  # multiplicity is then passed back to the multiplicity() function along with
-  # an updated value of count and an updated dictionary D
-  # Arguments:
-  #   q : 
-  #   k : 
-  #   D : a dictionary for the number of partitions of Q having N or less
-  #   parts (or N or less as the largest part), i.e. P(Q, Q + N).                
-  #   rand_int :
-  #   count : count < rand_int
   multi = NULL # the multiplicity 
   f = 1
   while (f > 0) {
@@ -313,16 +343,19 @@ get_multiplicity = function(q, k, D, rand_int, count, use_c, use_dict){
 }  
 
 
+#' multiplicity method of generating uniform random partitions of Q having N
+#' parts.
+#'
+#' @param part a vector to hold the partition
+#' @param q the total sum of the partition
+#' @param D a dictionary for the number of partitions of Q having N or less
+#'        parts (or N or less as the largest part), i.e. P(Q, Q + N).        
+#' @param rand_int random integer
+#' @param use_c boolean if TRUE then compiled c code is used
+#' @export
+#' @examples
+#' multiplicity(c(5, 4), 4, hash(), 1, T, T) 
 multiplicity =  function(part, q, D, rand_int, use_c, use_dict){
-  # multiplicity method of generating uniform random partitions of Q having N
-  # parts.
-  # Arguments:
-  #   part : a list to hold the partition
-  #   q : the total sum of the partition
-  #   D : a dictionary for the number of partitions of Q having N or less
-  #   parts (or N or less as the largest part), i.e. P(Q, Q + N).        
-  #   rand_int : 
-  #   use_c :
   while (q > 0) {
     multi = NULL
     if (!is.null(part)) {
