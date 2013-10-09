@@ -3,10 +3,11 @@ Title: Code for integer partitioning
 Description: Provides algorithims for randomly sampling a feasible set defined
     by a given total and number of elements using integer partitioning.
 Version: 0.1
-Author: Dan McGlinn, Ken Locey
-Maintainer: Dan McGlinn <danmcglinn@gmail.com>
+Author: Ken Locey, Daniel McGlinn
+Maintainer: Daniel McGlinn <danmcglinn@gmail.com>
 Depends:
-    R (>= 2.15.1)
+    R (>= 2.15.1),
+    hash
 NeedsCompilation: yes
 Repository: CRAN
 URL: https://github.com/klocey/partitions
