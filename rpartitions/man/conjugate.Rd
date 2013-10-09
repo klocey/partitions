@@ -19,6 +19,6 @@ http://www.sagenb.org/src/combinat/partition.py}
   http://www.sagenb.org/src/combinat/partition.py
 }
 \examples{
-conjugate(c(3,3,1,1), F)
+conjugate(c(3,3,1,1), FALSE)
 }
 

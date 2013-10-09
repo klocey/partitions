@@ -35,6 +35,6 @@ an updated value of count and an updated dictionary D}
   value of count and an updated dictionary D
 }
 \examples{
-get_multiplicity(10, 5, hash(), 3, 2, T, T)
+get_multiplicity(10, 5, hash(), 3, 2, TRUE, FALSE)
 }
 

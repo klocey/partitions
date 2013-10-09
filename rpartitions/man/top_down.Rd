@@ -26,6 +26,6 @@
   of Q having N parts.
 }
 \examples{
-top_down(c(5, 4), 4, hash(), 1, T, T)
+top_down(c(5, 4), 4, hash(), 1, TRUE, FALSE)
 }
 

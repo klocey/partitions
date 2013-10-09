@@ -55,7 +55,7 @@ P = function(D, q, k, use_c, use_dict) {
 #' @export
 #' @useDynLib 'rpartitions'
 #' @examples
-#' conjugate(c(3,3,1,1), F)
+#' conjugate(c(3,3,1,1), FALSE)
 conjugate = function(part, use_c=TRUE){ 
   if (is.null(part)) {
     conj = NULL
@@ -202,7 +202,7 @@ rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
 #' @param use_dict boolean, if TRUE then hash dictionary is used
 #' @export
 #' @examples
-#' bottom_up(c(5, 4), 4, hash(), 1, T, T)
+#' bottom_up(c(5, 4), 4, hash(), 1, TRUE, FALSE)
 bottom_up = function(part, q, D, rand_int, use_c, use_dict) {
   while (q > 0) {
     for (k in 1:q) {
@@ -239,7 +239,7 @@ bottom_up = function(part, q, D, rand_int, use_c, use_dict) {
 #' @param use_dict boolean, if TRUE then hash dictionary is used
 #' @export
 #' @examples
-#' top_down(c(5, 4), 4, hash(), 1, T, T)
+#' top_down(c(5, 4), 4, hash(), 1, TRUE, FALSE)
 top_down = function(part, q, D, rand_int, use_c, use_dict) {
   while (q > 0) {
     if (!is.null(part)) {
@@ -279,7 +279,7 @@ top_down = function(part, q, D, rand_int, use_c, use_dict) {
 #' @param use_dict boolean, if TRUE then hash dictionary is used
 #' @export
 #' @examples
-#' divide_and_conquer(c(5, 4), 4, hash(), 1, T, T)
+#' divide_and_conquer(c(5, 4), 5, 4, hash(), 2, TRUE, FALSE)
 divide_and_conquer = function(part, q, N, D, rand_int, use_c, use_dict) {
   max_int = N
   min_int = 1 
@@ -324,7 +324,7 @@ divide_and_conquer = function(part, q, N, D, rand_int, use_c, use_dict) {
 #' @param use_dict boolean, if TRUE then hash dictionary is used
 #' @export
 #' @examples
-#' get_multiplicity(10, 5, hash(), 3, 2, T, T)
+#' get_multiplicity(10, 5, hash(), 3, 2, TRUE, FALSE)
 get_multiplicity = function(q, k, D, rand_int, count, use_c, use_dict){
   multi = NULL # the multiplicity 
   f = 1
@@ -354,7 +354,7 @@ get_multiplicity = function(q, k, D, rand_int, count, use_c, use_dict){
 #' @param use_c boolean if TRUE then compiled c code is used
 #' @export
 #' @examples
-#' multiplicity(c(5, 4), 4, hash(), 1, T, T) 
+#' multiplicity(c(5, 4), 4, hash(), 1, TRUE, FALSE) 
 multiplicity =  function(part, q, D, rand_int, use_c, use_dict){
   while (q > 0) {
     multi = NULL

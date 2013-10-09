@@ -30,6 +30,6 @@ having N parts.}
   partitions of Q having N parts.
 }
 \examples{
-divide_and_conquer(c(5, 4), 4, hash(), 1, T, T)
+divide_and_conquer(c(5, 4), 5, 4, hash(), 2, TRUE, FALSE)
 }
 
