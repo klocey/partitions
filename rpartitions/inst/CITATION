@@ -9,6 +9,4 @@ bibentry("Manual",
    year   = "2012",
    note   = "R package version 0.1",
    url    = "https://github.com/klocey/partitions",
-
-   mheader = "To cite rpartitions in publications use:"
-)
+   mheader = "To cite rpartitions in publications use:")
