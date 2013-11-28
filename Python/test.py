@@ -1,9 +1,6 @@
+#! /usr/bin/env python
+
 from __future__ import division
-
-from sage.all import * # Sage is necessary for generating figure 2 of Locey and McGlinn (2013)
-# This can be commented out if not generating figure 2 or if the user does not have Sage installed
-# If Sage is installed, then from the command line: sage -python Locey_McGlinn_2013.py 
-
 import sys
 import os
 import partitions as parts
