@@ -1,5 +1,4 @@
-#!/usr/bin/env sage -python
-
+from __future__ import division
 import sys
 import numpy as np
 from scipy.stats import gaussian_kde
@@ -10,6 +9,26 @@ import random, decimal
 
 
 """ functions for statistical evenness using Smith and Wilson's evenness index (Smith and Wilson 1996) """
+
+def get_kdens_obs(partitions, metric):
+
+    if metric == 'gini':
+        D = get_kdens_obs_gini(partitions) # inequality
+    
+    elif metric == 'evar':
+        D = get_kdens_obs_Evar(partitions) # Evar cannot be calculated when zeros = True
+    
+    elif metric == 'median':
+        D = get_kdens_obs_MD(partitions)
+    
+    elif metric == 'variance':
+        D = get_kdens_obs_var(partitions) # variance
+    
+    elif  metric == 'skewness':
+        D = get_kdens_obs_skew(partitions) # skewness
+    
+    return D
+    
 
 def simplest_gini(x): #x is a vector of integers
     """This script was obtained from: https://subversion.american.edu/aisaac/notes/blinder_slides.xhtml.
