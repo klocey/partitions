@@ -8,7 +8,7 @@ import math
 import random, decimal
 
 
-""" functions for statistical evenness using Smith and Wilson's evenness index (Smith and Wilson 1996) """
+""" functions for calculating statistical metrics for vectors of integers """
 
 def get_kdens_obs(partitions, metric):
 
