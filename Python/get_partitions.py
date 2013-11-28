@@ -1,6 +1,6 @@
-#!/usr/bin/env sage -python
+#! /usr/bin/env python
 
-#from sage.all import *
+from __future__ import division
 import sys
 import subprocess
 import partitions as parts
@@ -17,202 +17,118 @@ import time
 from multiprocessing import Pool, freeze_support
 
 
+""" Code to generate random integer partitions for a total q having n parts. 
+    combinations of q and n are obtained from data files formatted in columns.
+    For example, with site as the first column, species as the second, and the
+    species abundance as the third. This code uses the multiprocessing module.
+    Randon integer partitions are saved to a file. """
+
 def worker(NS_combo):
     """thread worker function"""
     #set_random_seed()
     random.seed()
-    N = NS_combo[0]
-    S = NS_combo[1]
-    random_macros = parts.rand_parts(N, S, 10, 'divide_and_conquer', zeros=True)
+    q = qn_combo[0]
+    n = qn_combo[1]
+    random_macros = parts.rand_partitions(q, n, 30, 'divide_and_conquer', zeros=True)
+    # partitions including zeros = True; excluding zeros = False
     return random_macros
 
 
-def get_rand_sample(NS_combo): #choose between worker2 (random partitioning alg derived by KJL (may not return uniform random samples) and worker1 (random partitioning alg provided by SAGE)
+def get_rand_sample(qn_combo):
     
-    unique_SADs = []
+    unique_partitions = []
     pool = Pool()
-    unique_SADs = pool.map(worker, [NS_combo,NS_combo,NS_combo,NS_combo,NS_combo,NS_combo,NS_combo,NS_combo])
-    """ worker1 and worker2 call different functions for generating random macrostates. worker1 uses Sage's function (def. worker2 uses the function developed by Ken Locey (faster)."""
+    unique_partitions = pool.map(worker, [qn_combo, qn_combo, qn_combo, qn_combo, qn_combo, qn_combo, qn_combo, qn_combo])
     pool.close()
     pool.join()
-    return unique_SADs
+    
+    return unique_partitions
     
     
-def get_SADs(dataset):
+def get_partitions(dataset):
 
     DATA = open('/home/kenlocey/data1/' + dataset + '/' + dataset + '-data.txt','r')
     ct1 = 0
     ct2 = 0
     d = DATA.readline()
-    m0 = re.match(r'\A\S*',d).group()
-    m2 = int(re.findall(r'\d*\S$',d)[0])
-    SAD = [int(m2)]
-    SADs = []
+    label = re.match(r'\A\S*',d).group()
+    val = int(re.findall(r'\d*\S$',d)[0])
+    partition = [int(val)]
+    partitions = []
         
     for d in DATA:
         ct1+=1
-        m1 = re.match(r'\A\S*',d).group()
-        if m1 == m0:
-            m2 = int(re.findall(r'\d*\S$',d)[0])
-            if m2 > 0:
-                SAD.append(m2)
+        label1 = re.match(r'\A\S*',d).group()
+        if label1 == label:
+            val = int(re.findall(r'\d*\S$',d)[0])
+            if val > 0:
+                partition.append(val)
                 
         else:
-            site_name = m0
-            m0 = m1
-            if len(SAD) > 9 and sum(SAD) <= 1000000:
-                SAD.sort()
-                SAD.reverse()
-                SADs.append(SAD)
+            label = label1
+            if len(partition) > 9 and sum(partition) <= 1000000:
+                partition.sort()
+                partition.reverse()
+                partitions.append(partition)
                 ct2+=1
-            SAD = []
-            abundance = int(re.findall(r'\d*\S$',d)[0])
-            if abundance > 0:SAD.append(abundance)
+            partition = []
+            val = int(re.findall(r'\d*\S$',d)[0])
+            if val > 0:partition.append(val)
+    partitions.append(partition)
     DATA.close()
-    return(SADs)
+    return(partitions)
     
-def get_NS_combos(datasets):
-    NS_combos = []
+def get_qn_combos(datasets):
+    qn_combos = []
     total_combos = 0
     for dataset in datasets:
         ct=0
-        SADs = get_SADs(dataset)
-        for SAD in SADs:
-            N = sum(SAD)
-            S = len(SAD)
-            NS_combos.append([N,S])
-        print dataset,     
+        partitions = get_partitions(dataset)
+        for partition in partitions:
+            q = sum(partition)
+            n = len(partition)
+            qn_combos.append([q, n])
+        #print dataset,     
         
-    NS_combos = [list(x) for x in set(tuple(x) for x in NS_combos)]
-    print len(NS_combos),'unique NS_combos' 
+    qn_combos = [list(x) for x in set(tuple(x) for x in qn_combos)]
+    print len(qn_combos),'unique qn combos' 
     
-    return (NS_combos)
+    return (qn_combos)
     
         
-def get_random_macrostates_for_NScombos(NS_combos):    
-    #random.shuffle(NS_combos)
-    while NS_combos:
+def get_random_partitions_for_qn_combos(qn_combos):    
+    #random.shuffle(qn_combos)
+    qn_combos.sort(key=lambda x: float(x[0]))
+    while qn_combos:
         ct = 0
-        for NS_combo in NS_combos:
+        for qn_combo in qn_combos:
             
             ct+=1
-            N = int(NS_combo[0])
-            S = int(NS_combo[1])
-            print N, S, len(NS_combos), 'NS combinations left'
-            OUT = open('/home/kenlocey/combined1/' + str(N) + '-' + str(S) + '.txt','a+')
-            macros = len(set(OUT.readlines()))
+            q = int(qn_combo[0])
+            n = int(qn_combo[1])
+            print q, n, len(qn_combos), 'NS combinations left'
+            OUT = open('/home/kenlocey/partition_files/' + str(q) + '-' + str(n) + '.txt','a+')
+            partitions = len(set(OUT.readlines()))
             
-            if macros < 1000: 
-                rand_macros = get_rand_sample(NS_combo) # Use multiprocessing
+            if partitions < 500: 
+                rand_partitions = get_rand_sample(qn_combo) # Use multiprocessing
                 for i in rand_macros:
                     for p in i:
                         print>>OUT,p
                 OUT.close()
-                #NS_combos.remove(NS_combo)
+                #NS_combos.remove(qn_combo)
                     
-            elif len(NS_combos) == 1:
-                NS_combos.remove(NS_combo)
+            elif len(qn_combos) == 1:
+                qn_combos.remove(qn_combo)
                 OUT.close
                 break
             else:    
-                NS_combos.remove(NS_combo)
+                qn_combos.remove(qn_combo)
                 OUT.close()
-            if not NS_combos:break
+            if not qn_combos:break
     return
 
 
-def get_SSADs(dataset):
-    
-    richness = 301
-    abu_class = []
-    SSADs = [[] for x in xrange(richness)] # one frequency distribution per species
-    
-    PATH = '/home/kenlocey/data1/' + dataset + '/' + dataset + '-SSADs.txt'
-    if path.exists(PATH) and path.isfile(PATH) and access(PATH, R_OK):
-        DATA = open(PATH,'r')
-        d = DATA.readline() # first line has no abundance info, so skip it
-        
-        for d in DATA:
-            line = list(str(re.match(r'\A\S*',d).group()).split(',')) # site
-            line.pop(0) # first item is the spatial grain and isn't needed, so pop it
-            abu_class.append(int(line[0])) # now, the first item is the abundance class, assign it to a variable...
-            line.pop(0) # then pop it from the list. Now, only frequencies for species remain in the list
-            
-            for i, item in enumerate(line):
-                SSADs[i].append(int(item))
-        
-        
-        return SSADs 
-
-
-def hist_to_rank(SSADs):
-    
-    richness = len(SSADs)
-    abu_class = range(0,len(SSADs[0])+1)
-    
-    rank_vectors = [[] for x in xrange(richness)] # one rank distribution per species
-    for i, ssad in enumerate(SSADs):
-        for j, ab in enumerate(ssad):
-            if ab == 0:
-                continue
-            else:
-                #print abu_class[j], ab
-                _list = [abu_class[j]]*ab
-                rank_vectors[i].extend(_list)
-        
-    species_abs = []
-    RADs = []
-    
-    for i, _list in enumerate(rank_vectors):
-        if sum(_list) >= 0:
-            _list.reverse() 
-            species_abs.append(sum(_list))
-            RADs.append(_list)
-    # uncommenting these lines reveals that the abundances for species on BCI
-    # matches the BCI RAD, meaning nothing has gone wrong.
-    #species_abs.sort()
-    #species_abs.reverse()
-    #for i in species_abs: print i
-    #print species_abs
-    #print len(rank_vectors), max(species_abs)
-        
-    # So, at this point we have a rank distribution for each species.        
-    
-    return RADs
-
-
-def NScombos_SSAD(datasets):
-    
-    NScombos = []
-    
-    SSADs = get_SSADs(datasets[0])
-    RADs = hist_to_rank(SSADs)
-    
-    for rad in RADs:
-        N = sum(rad)
-        S = len(rad)
-        if N >= 2000 and N < 10000: 
-            NScombos.append([N,S])
-        
-    return NScombos
-    
-
-
-datasets = ['BCI']
-
-NScombos = NScombos_SSAD(datasets)
-print len(NScombos)
-#NScombos = get_NS_combos(datasets)
-
-get_random_macrostates_for_NScombos(NScombos)
-
-
-
-
-
-
-
-#def worker(QN_combo):
-#    set_random_seed()
-#        subprocess.call(["nice", "sage", "-python", "get_partitions.py", str(QN_combo[0]), str(QN_combo[1]), str(QN_combo[2]), str(QN_combo[3]), str(QN_combo[4])])
-#    return [QN_combo[2], t.interval]
+datasets = ['BBS']
+qncombos = get_qn_combos(datasets)
+get_random_partitions_for_qn_combos(qncombos)
