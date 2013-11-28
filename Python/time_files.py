@@ -1,6 +1,5 @@
-#!/usr/bin/env sage -python
+#!/usr/bin/env python
 
-from sage.all import *
 import sys
 import subprocess
 import os
@@ -27,15 +26,6 @@ class Timer:
         self.interval = self.end - self.start
         
         
-def rand_part_Sage(Q,N,sample_size):
-    parts = []
-    while len(parts) < sample_size:
-        part = Partitions(Q).random_element()
-        if len(part) == N:
-            parts.append(part)
-    
-    return parts
-
 def worker(QN_combo):
     set_random_seed()
     with Timer() as t:  
@@ -94,17 +84,3 @@ for zero in zeros:
                 if nX == Q: break
                 elif nX + 8*step > Q: nX = Q
                 else: nX += 8*step
-                    
-
-
-
-
-
-
-
-
-
-
-
-
-
