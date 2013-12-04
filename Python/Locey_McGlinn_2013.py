@@ -1,11 +1,12 @@
 from __future__ import division
 
-from sage.all import * # Sage is necessary for generating figure 2 of Locey and McGlinn (2013)
-# This can be commented out if not generating figure 2 or if the user does not have Sage installed
+from sage.all import * # Sage is necessary for generating figure 2 and 3 of Locey and McGlinn (2013)
+# This can be commented out if not generating figure 2 or 3 or if the user does not have Sage installed
 # If Sage is installed, then from the command line: sage -python Locey_McGlinn_2013.py 
 
 import sys
 import os
+import re
 import partitions as parts
 sys.path.append("/home/kenlocey/modules/pymods")
 import macroecotools
@@ -21,12 +22,10 @@ import  matplotlib.pyplot as plt
 from pylab import *
 import numpy as np
 from scipy import stats
-from scipy.stats import kstest
 import random
 from random import choice
-import re
 import math
-import random, decimal
+import decimal
 import time
 
 
@@ -461,7 +460,7 @@ def vectorTohist(vector, zeros):
     return SSAD    
 
 
-def get_all_SSADs(qnlist): # Figure X Locey and McGlinn (2013)      
+def get_all_SSADs(qnlist): 
     
     s_size = 300 
     i = 1
@@ -559,12 +558,12 @@ def get_all_SSADs(qnlist): # Figure X Locey and McGlinn (2013)
     print 'done'
     
     
-#kdens_unbias() # figures 2 Locey & McGlinn (2013), as well as figs 1 and 2 of the appendix 
-#print 'Fig 2: finished'            
-#time_trials_sage() # figure 3 Locey & McGlinn (2013)
-#print 'Fig 3: finished'
-#winner() # figure 4 Locey & McGlinn (2013)
-#print 'Fig 4: finished'
+kdens_unbias() # figures 2 Locey & McGlinn (2013), as well as figs 1 and 2 of the appendix 
+print 'Fig 2: finished'            
+time_trials_sage() # figure 3 Locey & McGlinn (2013)
+print 'Fig 3: finished'
+winner() # figure 4 Locey & McGlinn (2013)
+print 'Fig 4: finished'
 get_all_SSADs([1000,[100,500]])
 #time_trials_bigQ() # figure 3 in the appendix of Locey & McGlinn (2013)
 
