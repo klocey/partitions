@@ -44,10 +44,6 @@ def rand_parts_Sage(q, n, sample_size, zeros):
 
 
 def random_partitions_with_Sage(): 
-    """ The code below compares random partitioning nplottions of Sage and Locey and McGlinn (2013)
-    to full feasible sets. These analyses confirm that the algorithms are unbiased. The code
-    uses full feasible sets, the random partitioning function in Sage, and the random partitioning
-    for cases when 0' are or are not allowed."""
     
     qn_combos = [[50,10],[100,20],[200,40]]
     sample_size = 300 
