@@ -6,19 +6,16 @@ from sage.all import * # Sage is necessary for generating figure 2 and 3 of Loce
 
 import sys
 import os
+from os import path, access, R_OK  # W_OK for write permission
 import re
 import partitions as parts
-sys.path.append("/home/kenlocey/modules/pymods")
-import macroecotools
-sys.path.append("/home/kenlocey/modules/FEASIBLE_FUNCTIONS")
-import feasible_functions as ff
-sys.path.append("/home/kenlocey/partitions/metrics")
+
+sys.path.append("metrics")
 import metrics as mt
 
-from os import path, access, R_OK  # W_OK for write permission
 from mpl_toolkits.axes_grid.inset_locator import inset_axes
 from scipy.stats import gaussian_kde
-import  matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from pylab import *
 import numpy as np
 from scipy import stats
@@ -215,14 +212,14 @@ def winner():
                         
             for alg in algorithms:
                 if zero == True:
-                    DATA = open('time_files/PythontimeFiles/Python_' + alg[0] + '_zeros_Q=' + str(q) + '.txt','r')
+                    DATA = open('timeFiles/Python_' + alg[0] + '_zeros_Q=' + str(q) + '.txt','r')
                     for d in DATA:
                         n = int(re.findall(r'\d*\S\d*',d)[0])
                         t = float(re.findall(r'\d*\S\d*',d)[1])
                         BigList[0].append([alg[1], q, n, t]) # assigns a color value representing the algorithm
             
                 elif zero == False:
-                    DATA = open('time_files/PythontimeFiles/Python_' + alg[0] + '_Q=' + str(q) + '.txt','r')
+                    DATA = open('timeFiles/Python_' + alg[0] + '_Q=' + str(q) + '.txt','r')
                     for d in DATA:
                         n = int(re.findall(r'\d*\S\d*',d)[0])
                         t = float(re.findall(r'\d*\S\d*',d)[1])
@@ -450,9 +447,10 @@ def get_skews(_list):
 def vectorTohist(vector, zeros):
     
     bins = range(0,40)#[0,1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768]
+    n = len(vector)
     SSAD = [0]*len(bins)
     for p in vector:
-        if p < 40: SSAD[p]+=1
+        if p < 40: SSAD[p] += 1/n
         
     while SSAD[-1] == 0:
         SSAD.pop()   
@@ -460,7 +458,7 @@ def vectorTohist(vector, zeros):
     return SSAD    
 
 
-def get_all_SSADs(qnlist): 
+def get_all_SSADs(qnlist): # Figure X Locey and McGlinn (2013)      
     
     s_size = 300 
     i = 1
@@ -468,7 +466,7 @@ def get_all_SSADs(qnlist):
     q = qnlist[0]
     nlist = qnlist[1]
     
-    colors = ['#FF1493','gray']
+    colors = ['#00CED1', '#FF1493', 'gray']
     
     for ind, num in enumerate(nlist):
         ax = fig.add_subplot(3,3,i)
@@ -542,14 +540,20 @@ def get_all_SSADs(qnlist):
             
         ranks = range(1,n+1)
         max_ab = 0
+        varlist = []
         for rad in RADs:
             log_rad = list(np.log(rad))
+            
+            variance = np.var(rad, ddof=1)
+            varlist.append(variance)
+            
             if max(rad) > max_ab: max_ab = max(rad)
             plt.plot(ranks,rad, color=colors[ind], lw=1.0,alpha=0.04)    
+        print ' log(mean) vs. log(variance):', np.log(q/n), np.log(np.mean(varlist))
         plt.tick_params(axis='both', which='major', labelsize=5)
         plt.yscale('log')
         plt.xlabel("Rank",fontsize=8)
-        plt.ylabel("Relative abundance",fontsize=8)
+        plt.ylabel("Abundance",fontsize=8)
         i+=1
         
         
@@ -558,13 +562,13 @@ def get_all_SSADs(qnlist):
     print 'done'
     
     
-kdens_unbias() # figures 2 Locey & McGlinn (2013), as well as figs 1 and 2 of the appendix 
-print 'Fig 2: finished'            
-time_trials_sage() # figure 3 Locey & McGlinn (2013)
-print 'Fig 3: finished'
+#kdens_unbias() # figures 2 Locey & McGlinn (2013), as well as figs 1 and 2 of the appendix 
+#print 'Fig 2: finished'            
+#time_trials_sage() # figure 3 Locey & McGlinn (2013)
+#print 'Fig 3: finished'
 winner() # figure 4 Locey & McGlinn (2013)
 print 'Fig 4: finished'
-get_all_SSADs([1000,[100,500]])
+#get_all_SSADs([1000,[100,500]])
 #time_trials_bigQ() # figure 3 in the appendix of Locey & McGlinn (2013)
 
 
