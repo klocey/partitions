@@ -38,9 +38,9 @@ def simplest_gini(x): #x is a vector of integers
     yn, ysum, countx = 0.0, 0.0, 0
     #compute yN and ysum
     for xn in sorted(x):
-      yn = (yn + xn)
-      ysum = (ysum + yn)
-      countx = (countx + 1)
+        yn = (yn + xn)
+        ysum = (ysum + yn)
+        countx = (countx + 1)
     #compute area below Lorenz curve
     B = ysum / (countx * yn)
     return(1 - 2*B)
