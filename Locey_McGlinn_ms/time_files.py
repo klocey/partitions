@@ -41,9 +41,9 @@ for zero in zeros:
                 times.append([n,t])
                 
                 if zero == True:
-                    OUT = open('timeFiles/Python_' + alg + '_zeros_q=' + str(q) + '.txt','a+')
+                    OUT = open('time_files/Python_' + alg + '_zeros_q=' + str(q) + '.txt','a+')
                 elif zero == False:
-                    OUT = open('timeFiles/Python_' + alg + '_q=' + str(q) + '.txt','a+')
+                    OUT = open('time_files/Python_' + alg + '_q=' + str(q) + '.txt','a+')
                 
                 for i in times:
                     print>>OUT, i[0], i[1]
