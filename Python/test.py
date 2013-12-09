@@ -4,11 +4,10 @@ from __future__ import division
 import sys
 import os
 import partitions as parts
-sys.path.append("/home/kenlocey/partitions/new/metrics")
 import metrics as mt
 from os import path, access, R_OK  # W_OK for write permission
 from scipy.stats import gaussian_kde
-from pylab import *
+from matplotlib.pylab import *
 import numpy as np
 from scipy import stats
 from scipy.stats import kstest
@@ -54,9 +53,6 @@ def test_first_lexical():
     
     return
 
-test_first_lexical()
-    
-
 def test_last_lexical():
     
     print '\nTesting to ensure the last lexical partition is correctly generated.'
@@ -89,8 +85,6 @@ def test_last_lexical():
         
     return
 
-test_last_lexical()
-
 
 def test_next_restricted_part():
     
@@ -106,9 +100,6 @@ def test_next_restricted_part():
         print 'next_restricted_part works. Test 1 PASS'
         
     return
-
-test_next_restricted_part()
-
 
 def test_min_max():
     
@@ -132,9 +123,6 @@ def test_min_max():
         print 'min_max() works. Test 2 PASS'
    
     return
-
-test_min_max()
-
 
 def test_P():
     
@@ -187,8 +175,6 @@ def test_P():
     
     return
 
-test_P()
-
 def test_NrParts():
     
     print '\nTesting to ensure the number of partitions for a given total (q) and number of parts (n) is correctly calculated.'
@@ -223,9 +209,6 @@ def test_NrParts():
         print 'NrParts works. Test 4 PASS'
         
     return
-
-test_NrParts()
-
 
 def test_conjugate():
     
@@ -264,8 +247,6 @@ def test_conjugate():
     
     return
 
-test_conjugate()
-
 
 def get_kdens(summands):
     """ Finds the kernel density function across a sample of parts
@@ -279,7 +260,6 @@ def get_kdens(summands):
     D = [xs,density(xs)]
     return D
 
-
 def bias_check():
 
     print '\nTesting algorithms for bias across combinations of q and n, allowing or excluding zero-valued parts.'
@@ -290,7 +270,7 @@ def bias_check():
         n = combo[1]
         
         sagepartitions = []     
-        DATA = open('/home/kenlocey/partitions/new/testfiles/sage_zeros_q=' + str(q) + '_n='+str(n)+'.txt','r')
+        DATA = open('./testfiles/sage_zeros_q=' + str(q) + '_n='+str(n)+'.txt','r')
         for line in DATA:
             partition = eval(line)
             sagepartitions.append(partition)
@@ -327,7 +307,7 @@ def bias_check():
         DATA.close()  
         
         sagepartitions = []     
-        DATA = open('/home/kenlocey/partitions/new/testfiles/sage_q=' + str(q) + '_n='+str(n)+'.txt','r')
+        DATA = open('./testfiles/sage_q=' + str(q) + '_n='+str(n)+'.txt','r')
         for line in DATA:
             partition = eval(line)
             sagepartitions.append(partition)
@@ -364,9 +344,6 @@ def bias_check():
         DATA.close()           
     return
     
-bias_check()
-
-
 def find_all():
     
     print '\nTesting that each random partitioning algorithm can discover the entire feasible set.'
@@ -396,7 +373,24 @@ def find_all():
             
     return
                
-find_all()  
 
-    
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'bias':
+            test_for_bias = True
+        else:
+            test_for_bias = False
+    else:
+        test_for_bias = False
+
+    test_first_lexical()
+    test_last_lexical()
+    test_next_restricted_part()
+    test_min_max()
+    test_P()
+    test_NrParts()
+    test_conjugate()
+    if test_for_bias:
+        bias_check()
+    find_all()
 print 'TESTS FINISHED'
