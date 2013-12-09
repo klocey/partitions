@@ -276,7 +276,6 @@ def bias_check():
             sagepartitions.append(partition)
         sagevars = []
         for partition in sagepartitions:
-            partition = np.log(partition)
             var = np.var(partition, ddof=1)
             sagevars.append(var)
               
@@ -293,7 +292,6 @@ def bias_check():
             
                 myvars = []
                 for partition in partitions:
-                    partition = np.log(partition)
                     var = np.var(partition, ddof=1)
                     myvars.append(var)
                 
@@ -313,7 +311,6 @@ def bias_check():
             sagepartitions.append(partition)
         sagevars = []
         for partition in sagepartitions:
-            partition = np.log(partition)
             var = np.var(partition, ddof=1)
             sagevars.append(var)
               
@@ -330,7 +327,6 @@ def bias_check():
             
                 myvars = []
                 for partition in partitions:
-                    partition = np.log(partition)
                     var = np.var(partition, ddof=1)
                     myvars.append(var)
                 
