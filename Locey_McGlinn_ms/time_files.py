@@ -3,7 +3,7 @@
 from __future__ import division
 import sys
 import os
-import partitions as parts
+import pypartitions as parts
 import time
 
 """ This file generates .txt files holding times taken for partitioning algorithms to generate random partitions for different combinations of Q and N.

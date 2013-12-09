@@ -8,7 +8,7 @@ import sys
 import os
 from os import path, access, R_OK  # W_OK for write permission
 import re
-import partitions as parts
+import pypartitions as parts
 
 sys.path.append("metrics")
 import metrics as mt
