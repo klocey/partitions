@@ -9,10 +9,10 @@ void NrParts(int *Q, int *N, double *p) {
 }
 
 
-void conjugate(int *l, int *j, int *part, int *conj) {
+void conjugate(int *l, int *j, int *partition, int *conj) {
   int i, k, times ;
   for (i = (*l - 1) ; i > 0; i--) {
-    times = part[i - 1] - part[i] ;
+    times = partition[i - 1] - partition[i] ;
     if (times > 0) {
       for(k = *j ; k < *j + times ; k++) {
         conj[k - 1] = i ;
