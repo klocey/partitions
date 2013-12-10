@@ -73,7 +73,11 @@ conjugate = function(partition, use_c=TRUE){
 #' NrParts(100, 10)
 NrParts = function(Q, N=NULL, use_c=TRUE){ 
   numparts = 0
+  if (Q == 0)
+    return(1) # by convention
   if (!is.null(N)) {
+    if (Q == N)
+      return(1) # by convention
     if (N >= Q/2) {
       Q = Q - N
       N = NULL
@@ -437,7 +441,7 @@ multiplicity =  function(part, Q, D, rand_int, use_c, use_hash){
       }   
       if (count < rand_int) { # k has been found
         k = k + 1
-        Mlist = get_multiplicity(Q, k, D, rand_int, count, use_c) # now, find how many times k occurs, i.e. the multiplicity of k 
+        Mlist = get_multiplicity(Q, k, D, rand_int, count, use_c, use_hash) # now, find how many times k occurs, i.e. the multiplicity of k 
         D = Mlist[[1]]
         count = Mlist[[2]]
         multi = Mlist[[3]]
