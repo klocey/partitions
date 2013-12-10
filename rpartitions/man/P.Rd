@@ -20,23 +20,30 @@
   \item{use_hash}{boolean, if TRUE then a hash table is
   used instead of R's native list to store the information}
 }
-\description{
-  Note: 1. Theorem: The number of partitions of Q with k or
-  less parts equals the number of partitions of Q with k or
-  less as the largest part (see Bona 2006).  This is a
-  mathematical symmetry, i.e. congruency.  Bona, M. (2006).
-  A Walk Through Combinatorics: An Introduction to
-  Enumeration and Graph Theory. 2nd Ed. World Scientific
-  Publishing Co. Singapore.
+\value{
+  a two element list, the first element is D the lookup
+  table and the second element is the number of partitions
+  for the specified Q and k value.
 }
-\details{
-  2. Proposition: The number of partitions of Q with k or
-  less parts equals the number of partitions of Q+k with k
-  as the largest part when k>0, i.e. P(Q + k, k). No source
-  known, but it can be shown when enumerating the entire
-  feasible set or using Sage:
+\description{
+  This function was derived using the following theorem and
+  proposition. The number of partitions of Q with k or less
+  parts equals the number of partitions of Q with k or less
+  as the largest part (see Bona 2006). This is a
+  mathematical symmetry, i.e. congruency. Additionally, the
+  number of partitions of Q with k or less parts equals the
+  number of partitions of Q+k with k as the largest part
+  when k>0, i.e. P(Q + k, k). We do not have a source for
+  this proposition, but it can be shown when enumerating
+  the entire feasible set or using the Sage computing
+  enviornment
 }
 \examples{
 P(list(), 100, 10, FALSE, FALSE)
+}
+\references{
+  Bona, M. (2006). A Walk Through Combinatorics: An
+  Introduction to Enumeration and Graph Theory. 2nd Ed.
+  World Scientific Publishing Co. Singapore.
 }
 

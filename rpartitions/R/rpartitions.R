@@ -126,17 +126,15 @@ NrParts = function(Q, N=NULL, use_c=TRUE){
 
 #' Number of partitions of Q with k or less parts.
 #' 
-#'     Note:
-#'     1. Theorem: The number of partitions of Q with k or less parts equals the
-#'     number of partitions of Q with k or less as the largest part (see Bona 2006).
-#'     This is a mathematical symmetry, i.e. congruency.
-#'     Bona, M. (2006). A Walk Through Combinatorics: An Introduction to Enumeration
-#'     and Graph Theory. 2nd Ed. World Scientific Publishing Co. Singapore.
-#'     
-#'     2. Proposition: The number of partitions of Q with k or less parts equals
-#'     the number of partitions of Q+k with k as the largest part when k>0,
-#'     i.e. P(Q + k, k). No source known, but it can be shown when enumerating the
-#'     entire feasible set or using Sage:
+#' 
+#' This function was derived using the following theorem and proposition. The
+#' number of partitions of Q with k or less parts equals the number of partitions
+#' of Q with k or less as the largest part (see Bona 2006). This is a mathematical
+#' symmetry, i.e. congruency. Additionally, the number of partitions of Q with k
+#' or less parts equals the number of partitions of Q+k with k as the largest part
+#' when k>0, i.e. P(Q + k, k). We do not have a source for this proposition, but
+#' it can be shown when enumerating the entire feasible set or using the Sage
+#' computing enviornment
 #'     
 #' @param D lookup table for numbers of partitions of Q having k or less parts 
 #' (or k or less as the largest part), i.e. P(Q, Q + k)
@@ -145,6 +143,10 @@ NrParts = function(Q, N=NULL, use_c=TRUE){
 #' @param use_c boolean, if TRUE the number of partitions is computed in c
 #' @param use_hash boolean, if TRUE then a hash table is used instead of R's native
 #' list to store the information
+#' @return a two element list, the first element is D the lookup table and the
+#' second element is the number of partitions for the specified Q and k value.  
+#' @references Bona, M. (2006). A Walk Through Combinatorics: An Introduction to Enumeration
+#' and Graph Theory. 2nd Ed. World Scientific Publishing Co. Singapore.
 #' @export
 #' @examples
 #' P(list(), 100, 10, FALSE, FALSE)
