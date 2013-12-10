@@ -16,7 +16,7 @@ import metrics as mt
 from mpl_toolkits.axes_grid.inset_locator import inset_axes
 from scipy.stats import gaussian_kde
 import matplotlib.pyplot as plt
-from pylab import *
+from matplotlib.pylab import *
 import numpy as np
 from scipy import stats
 import random
