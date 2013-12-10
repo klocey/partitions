@@ -3,7 +3,7 @@
 from __future__ import division
 import sys
 import os
-import partitions as parts
+import pypartitions as parts
 import metrics as mt
 from os import path, access, R_OK  # W_OK for write permission
 from scipy.stats import gaussian_kde
