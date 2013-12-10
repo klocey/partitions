@@ -10,7 +10,6 @@ get_rand_int = function(min=0, max=1) {
   return(int)
 }
 
-
 #' Returns the last element of a vector
 #' 
 #' @param x a vector
@@ -20,6 +19,105 @@ get_rand_int = function(min=0, max=1) {
 #' last(letters[1:10])
 last = function(x) { tail(x, n = 1) }
 
+#' Find the conjugate of an integer partition
+#' Recoded (orginally on 24-Apr-2013) from the Sage source code:
+#' http://www.sagenb.org/src/combinat/partition.py
+#' 
+#' @param partition a vector that represents an integer partition
+#' @param use_c logical, defaults to TRUE, the conjugate is computed in c
+#' @export
+#' @useDynLib 'rpartitions'
+#' @examples
+#' conjugate(c(3,3,1,1), FALSE)
+conjugate = function(partition, use_c=TRUE){ 
+  if (is.null(partition)) {
+    conj = NULL
+  }  
+  else {
+    l = length(partition)
+    if (use_c) {
+      conj = rep(0, max(partition))
+      conj[1:last(partition)] = rep(l, last(partition))      
+      j = last(partition) + 1
+      conj = .C("conjugate", l = as.integer(l), j = as.integer(j),
+                partition = as.integer(partition), conj = as.integer(conj))$conj
+    }            
+    else {
+      conj = rep(l, last(partition))
+      for (i in (l - 1):1)
+        conj = c(conj, rep(i, partition[i] - partition[i + 1]))
+    }  
+  }
+  return(conj)
+}
+
+#' Find the number of partitions for a given total Q and number of parts N.
+#' Recoded and modified from GAP source code: www.gap-system.org.  
+#' 
+#' Modifications for speed based on the proposition that the number of partitions
+#' of Q having N parts is equal to the number of partitions of Q having N parts 
+#' is equal to the number of partitions of Q - N, if N > Q/2 (for odd Q) or if 
+#' N >= Q/2 (for even Q)
+#'
+#' @param Q Total sum
+#' @param N Number of items to sum across
+#' @param use_c logical, defaults to TRUE, the number of partitions is computed in c  
+#' @export 
+#' @useDynLib 'rpartitions'
+#' @examples
+#' NrParts(100)
+#' NrParts(100, 10)
+NrParts = function(Q, N=NULL, use_c=TRUE){ 
+  numparts = 0
+  if (!is.null(N)) {
+    if (N >= Q/2) {
+      Q = Q - N
+      N = NULL
+    }  
+  }
+  if (is.null(N)) {
+    numparts = 1
+    p = rep(1, Q + 1)
+    for (i in 1:Q) {
+      numparts = 0
+      k = 1
+      l = 1
+      while (0 <= i - (l + k)){
+        numparts = numparts - (-1)^k * (p[i - l + 1] + p[i - (l + k) + 1])
+        k = k + 1
+        l = l + 3 * k - 2
+      }
+      if (0 <= (i - l)){
+        numparts = numparts - (-1)^k * p[i - l + 1]
+      }
+      p[i + 1] = numparts
+    }
+  }
+  else {
+    numparts = 0  
+    if (Q == N | N == 1) {
+      numparts = 1
+    }
+    else if (Q < N | N == 0) {
+      numparts = 0
+    }
+    else {
+      p = rep(1, Q)
+      if (use_c) {
+        p = .C("NrParts", Q = as.integer(Q), N = as.integer(N), p = as.double(p))$p
+      }
+      else {
+        for (i in 2:N) {
+          for (m in (i + 1):(Q - i + 1)) {
+            p[m + 1] = p[m + 1] + p[m - i + 1]
+          }
+        }  
+      }
+      numparts = p[Q - N + 2]
+    }  
+  }
+  return(numparts)
+}
 
 #' Number of partitions of q with k or less parts (or having k or less as the
 #' largest part), i.e. P(q+k,k).
@@ -46,79 +144,6 @@ P = function(D, q, k, use_c, use_dict) {
 }
 
 
-#' Find the conjugate of an integer partition
-#' Recoded (orginally on 24-Apr-2013) from the Sage source code:
-#' http://www.sagenb.org/src/combinat/partition.py
-#' 
-#' @param part a vector that represents an integer partition
-#' @param use_c logical, defaults to TRUE, the conjugate is computed in c
-#' @export
-#' @useDynLib 'rpartitions'
-#' @examples
-#' conjugate(c(3,3,1,1), FALSE)
-conjugate = function(part, use_c=TRUE){ 
-  if (is.null(part)) {
-    conj = NULL
-  }  
-  else {
-    l = length(part)
-    if (use_c) {
-      conj = rep(0, max(part))
-      conj[1:last(part)] = rep(l, last(part))      
-      j = last(part) + 1
-      conj = .C("conjugate", l = as.integer(l), j = as.integer(j),
-                part = as.integer(part), conj = as.integer(conj))$conj
-    }            
-    else {
-      conj = rep(l, last(part))
-      for (i in (l - 1):1)
-        conj = c(conj, rep(i, part[i] - part[i + 1]))
-    }  
-  }
-  return(conj)
-}
-
-
-#' Find the number of partitions for a given total Q and number of parts N.
-#' Recoded and modified from GAP source code: www.gap-system.org
-#'
-#' @param Q Total sum
-#' @param N Number of items to sum across
-#' @param use_c logical, defaults to TRUE, the number of partitions is computed in c  
-#' @export 
-#' @useDynLib 'rpartitions'
-#' @examples
-#' NrParts(100, 10)
-NrParts = function(Q, N=NULL, use_c=TRUE){ 
-  if (is.null(N)) {  # using p(Q) = p(Q + Q, Q)
-    N = Q
-    Q = Q * 2
-  }
-  parts = 0  
-  if (Q == N | N == 1) {
-    parts = 1
-  }
-  else if (Q < N | N == 0) {
-    parts = 0
-  }
-  else {
-    p = rep(1, Q)
-    if (use_c) {
-      p = .C("NrParts", Q = as.integer(Q), N = as.integer(N), p = as.double(p))$p
-    }
-    else {
-      for (i in 2:N) {
-        for (m in (i + 1):(Q - i + 1)) {
-          p[m + 1] = p[m + 1] + p[m - i + 1]
-        }
-      }  
-    }
-    parts = p[Q - N + 2]
-  }  
-  return(parts)
-}
-
-
 #' Generate uniform random partitions of Q having N parts.
 #'
 #' @param Q Total sum across parts
@@ -140,9 +165,9 @@ NrParts = function(Q, N=NULL, use_c=TRUE){
 #' @export
 #' @examples
 #' rand_parts(100, 10, 5)
-rand_parts = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
+rand_partitions = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
                       use_c=TRUE, use_dict=FALSE) {
-  parts= matrix(NA, ncol=sample_size, nrow=N)
+  parts = matrix(NA, ncol=sample_size, nrow=N)
   if (zeros) {
     Plist = P(D, Q, N, use_c, use_dict)
   }  
