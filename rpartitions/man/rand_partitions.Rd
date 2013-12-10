@@ -54,6 +54,6 @@
   any random partition of Q having N or less parts.
 }
 \examples{
-rand_parts(100, 10, 5)
+rand_partitions(100, 10, 5)
 }
 

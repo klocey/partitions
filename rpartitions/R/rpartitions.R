@@ -197,7 +197,7 @@ P = function(D, Q, k, use_c, use_hash) {
 #' partition of Q having N or less parts.
 #' @export
 #' @examples
-#' rand_parts(100, 10, 5)
+#' rand_partitions(100, 10, 5)
 rand_partitions = function(Q, N, sample_size, method='best', D=hash(), zeros=FALSE,
                       use_c=TRUE, use_hash=FALSE) {
   parts = matrix(NA, ncol=sample_size, nrow=N)
@@ -257,7 +257,7 @@ rand_partitions = function(Q, N, sample_size, method='best', D=hash(), zeros=FAL
 #' Bottom up method of generating uniform random partitions of Q having N parts.  
 #'
 #' @param part a list to hold the partition
-#' @param q the total sum of the partition
+#' @param Q the total sum of the partition
 #' @param D a dictionary for the number of partitions of Q having N or less
 #'   parts (or N or less as the largest part), i.e. P(Q + N, N).
 #' @param rand_int a number representing a member of the feasible set

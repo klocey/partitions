@@ -7,7 +7,7 @@
 \arguments{
   \item{part}{a list to hold the partition}
 
-  \item{q}{the total sum of the partition}
+  \item{Q}{the total sum of the partition}
 
   \item{D}{a dictionary for the number of partitions of Q
   having N or less parts (or N or less as the largest
