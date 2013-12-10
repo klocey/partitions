@@ -1,22 +1,40 @@
 \name{P}
 \alias{P}
-\title{Number of partitions of q with k or less parts (or having k or less as the
-largest part), i.e. P(q+k,k).}
+\title{Number of partitions of Q with k or less parts.}
 \usage{
-  P(D, q, k, use_c, use_dict)
+  P(D, Q, k, use_c, use_hash)
 }
 \arguments{
-  \item{D}{lookup table for numbers of partitions, P(q+k,k)
-  values.}
+  \item{D}{lookup table for numbers of partitions of Q
+  having k or less parts (or k or less as the largest
+  part), i.e. P(Q, Q + k)}
 
-  \item{q}{total sum of the set}
+  \item{Q}{total (i.e., sum across all k or n parts)}
 
-  \item{use_c}{logical, if TRUE the number of partitions is
+  \item{k}{the number of parts and also the size of the
+  largest part (congruency)}
+
+  \item{use_c}{boolean, if TRUE the number of partitions is
   computed in c}
+
+  \item{use_hash}{boolean, if TRUE then a hash table is
+  used instead of R's native list to store the information}
 }
 \description{
-  Number of partitions of q with k or less parts (or having
-  k or less as the largest part), i.e. P(q+k,k).
+  Note: 1. Theorem: The number of partitions of Q with k or
+  less parts equals the number of partitions of Q with k or
+  less as the largest part (see Bona 2006).  This is a
+  mathematical symmetry, i.e. congruency.  Bona, M. (2006).
+  A Walk Through Combinatorics: An Introduction to
+  Enumeration and Graph Theory. 2nd Ed. World Scientific
+  Publishing Co. Singapore.
+}
+\details{
+  2. Proposition: The number of partitions of Q with k or
+  less parts equals the number of partitions of Q+k with k
+  as the largest part when k>0, i.e. P(Q + k, k). No source
+  known, but it can be shown when enumerating the entire
+  feasible set or using Sage:
 }
 \examples{
 P(list(), 100, 10, FALSE, FALSE)

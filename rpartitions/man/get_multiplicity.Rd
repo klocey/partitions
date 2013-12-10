@@ -5,13 +5,13 @@ generated at random by the multiplicity() function. The resulting
 multiplicity is then passed back to the multiplicity() function along with
 an updated value of count and an updated dictionary D}
 \usage{
-  get_multiplicity(q, k, D, rand_int, count, use_c,
-    use_dict)
+  get_multiplicity(Q, k, D, rand_int, count, use_c,
+    use_hash)
 }
 \arguments{
-  \item{q}{}
+  \item{Q}{the total sum of the partition}
 
-  \item{k}{}
+  \item{k}{the size of the largest (and also first) part}
 
   \item{D}{a dictionary for the number of partitions of Q
   having N or less parts (or N or less as the largest
@@ -24,7 +24,7 @@ an updated value of count and an updated dictionary D}
   \item{use_c}{boolean if TRUE then compiled c code is
   used}
 
-  \item{use_dict}{boolean, if TRUE then hash dictionary is
+  \item{use_hash}{boolean, if TRUE then a hash table is
   used}
 }
 \description{

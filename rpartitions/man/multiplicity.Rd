@@ -3,12 +3,12 @@
 \title{multiplicity method of generating uniform random partitions of Q having N
 parts.}
 \usage{
-  multiplicity(part, q, D, rand_int, use_c, use_dict)
+  multiplicity(part, Q, D, rand_int, use_c, use_hash)
 }
 \arguments{
   \item{part}{a vector to hold the partition}
 
-  \item{q}{the total sum of the partition}
+  \item{Q}{the total sum of the partition}
 
   \item{D}{a dictionary for the number of partitions of Q
   having N or less parts (or N or less as the largest
@@ -17,6 +17,9 @@ parts.}
   \item{rand_int}{random integer}
 
   \item{use_c}{boolean if TRUE then compiled c code is
+  used}
+
+  \item{use_hash}{boolean, if TRUE then a hash table is
   used}
 }
 \description{
