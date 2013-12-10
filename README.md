@@ -9,13 +9,13 @@ Installation
 ============
 The R package can be installed directly from git hub using the following.
 
-library(devtools)
-install_github('partitions', 'klocey', subdir='rpartitions')
+        library(devtools)
+        install_github('partitions', 'klocey', subdir='rpartitions')
 
 or it can be locally installed using
 
-library(devtools)
-install()
+        library(devtools)
+        install()
 
 GNU GENERAL PUBLIC LICENSE
 ==========================
