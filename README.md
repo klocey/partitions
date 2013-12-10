@@ -7,15 +7,19 @@ Algorithms were derived by Ken Locey and coded into R by Dan McGlinn.
 
 Installation
 ============
-The R package can be installed directly from git hub using the following.
+pypartitions, the python package, can be installed by cloning the directory and running the following from the command line:
 
-        library(devtools)
-        install_github('partitions', 'klocey', subdir='rpartitions')
+    python setup.py install
+
+rpartitions, the R package, can be installed directly from git hub using the following R commands.
+
+    library(devtools)
+    install_github('partitions', 'klocey', subdir='rpartitions')
 
 or it can be locally installed using
 
-        library(devtools)
-        install()
+    library(devtools)
+    install()
 
 GNU GENERAL PUBLIC LICENSE
 ==========================
