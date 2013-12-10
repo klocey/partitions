@@ -9,7 +9,7 @@ Depends:
     R (>= 2.15.1),
     hash
 Suggests:
-    testthat (>= 0.2) 
+    testthat (>= 0.2)
 NeedsCompilation: yes
 Repository: CRAN
 URL: https://github.com/klocey/partitions
