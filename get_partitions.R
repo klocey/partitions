@@ -1,5 +1,5 @@
 
-source('./part_func.R')
+source('./rpartitions.R')
 
 load_c()
 
