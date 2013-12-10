@@ -118,7 +118,7 @@ def P(D, q, k):
         
         2. Proposition: The number of partitions of q with k or less parts equals the
            number of partitions of q+k with k as the largest part when k>0, i.e. P(q + k, k).
-           No source, but it can be shown when enumerating the entire feasible set
+           No source known, but it can be shown when enumerating the entire feasible set
            or using Sage:
                       
            Checks using Sage:
@@ -228,7 +228,6 @@ def bottom_up(part, q, D, rand_int):
     Arguments:
         part : a list to hold the partition
         q : the total sum of the partition
-        k : size of the largest (and also first) part
         D : a dictionary for the number of partitions of q having n or less
             parts (or n or less as the largest part), i.e. P(q + n, n).        
         rand_int : a number representing a member of the feasible set
@@ -261,7 +260,6 @@ def top_down(part, q, D, rand_int):
     Arguments:
         part : a list to hold the partition
         q : the total sum of the partition
-        k : size of the largest (and also first) part
         D : a dictionary for the number of partitions of q having n or less
             parts (or n or less as the largest part), i.e. P(q + n, n).        
         rand_int : a number representing a member of the feasible set
@@ -273,8 +271,7 @@ def top_down(part, q, D, rand_int):
             x = min(part)
         else: 
             x = q
-        for k in reversed(range(1, x + 1)): # loop through all possible values of the
-        # first/largest part
+        for k in reversed(range(1, x + 1)): # loop through all possible values of the first/largest part
             Plist = P(D, q, k) # number of partitions of q having k or less as the
             # largest part
             D = Plist[0]
@@ -297,7 +294,6 @@ def divide_and_conquer(part, q, n, D, rand_int):
     Arguments:
         part : a list to hold the partition
         q : the total sum of the partition
-        k : size of the largest (and also first) part
         n : number of parts to sum over
         D : a dictionary for the number of partitions of q having n or less
             parts (or n or less as the largest part), i.e. P(q + n, n).        
@@ -310,8 +306,7 @@ def divide_and_conquer(part, q, n, D, rand_int):
     max_int = int(n)
     min_int = int(1)
     while q > 0:
-        k = random.randrange(min_int, max_int + 1) # choose a value of the 
-        # largest part at random
+        k = random.randrange(min_int, max_int + 1) # choose a value of the largest part at random
         Plist = P(D, q, k)
         D = Plist[0]
         upper = Plist[1]
