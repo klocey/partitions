@@ -11,15 +11,21 @@ pypartitions, the python package, can be installed by cloning the directory and 
 
     python setup.py install
 
-rpartitions, the R package, can be installed directly from git hub using the following R commands.
+rpartitions, the R package, can be installed either from CRAN or directly from git hub. 
+
+To install the most recent stable version from CRAN use the following R command:
+
+    install.packages('rpartitions')
+    
+To install the most updated version directly from github use the following R commands:
 
     library(devtools)
     install_github('partitions', 'klocey', subdir='rpartitions')
 
-or it can be locally installed using
+Altneratively the pacakge can be downloaded from github and locally installed using:
 
     library(devtools)
-    install()
+    install('rpartitions')
 
 GNU GENERAL PUBLIC LICENSE
 ==========================
