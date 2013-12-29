@@ -1,8 +1,8 @@
-partitions--Code for integer partitioning
+rpartitions--Code for integer partitioning
 =========================================
 
-The code in this package is focused on the integer partitioning problem of randomly partitioning
-some total Q into N parts. These functions solve the main computational challenge of Locey and White (2013)
+rpartitions is an R package is focused on the integer partitioning problem of randomly partitioning
+some total q into n parts. These functions solve the main computational challenge of Locey and White (2013)
 and extend the 'feasible set' approach based on integer partitioning to several ecological patterns and 
 other distributions. 
 
@@ -32,10 +32,7 @@ GNU GENERAL PUBLIC LICENSE
 ==========================
 Version 2, June 1991
 
-partitions is a collection of Python coded functions useful for
-partitioning integers
-
-Copyright (C) Kenneth J. Locey
+Copyright (C) Kenneth J. Locey and Daniel J. McGlinn
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
