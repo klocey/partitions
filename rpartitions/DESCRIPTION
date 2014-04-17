@@ -7,6 +7,7 @@ Author: Ken Locey, Daniel McGlinn
 Maintainer: Daniel McGlinn <danmcglinn@gmail.com>
 Depends:
     R (>= 2.15.1),
+Imports:
     hash
 Suggests:
     testthat (>= 0.2)
