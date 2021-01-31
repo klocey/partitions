@@ -456,15 +456,14 @@ def last_lexical(q, n):
     return partition
 
 
+
 def min_max(q, n):
     """ Find the smallest possible maximum value for the first part in a partition
     of q having n parts """
-    
     test_qnk(q, n)
-    min_int = int(math.floor(float(q) / float(n)))
-    if int(q % n) > 0:
-        min_int +=1
-    return min_int
+    min_int, r = divmod(q, n)
+    return min_int + 1 if r else min_int
+
 
 
 def max_max(q, n):
