@@ -466,7 +466,17 @@ def min_max(q, n):
         min_int +=1
     return min_int
 
+
+def max_max(q, n):
+    """ Find the largest possible maximum value for the first part in a partition
+    of q having n parts """
     
+    test_qnk(q, n)
+    
+    maxk = q - n + 1
+    return maxk
+
+
 def first_lexical(q, n, k):
     """ Find the first lexical partition of q having n parts with k as the largest part
     q : the total sum of the partition
@@ -481,7 +491,7 @@ def first_lexical(q, n, k):
         partition.extend(ones)
         return partition
     
-    elif k < min_max(q, n):
+    elif k < min_max(q, n) or k > max_max(q, n):
         return None
         
     else:
