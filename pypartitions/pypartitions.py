@@ -476,7 +476,7 @@ def max_max(q, n):
     return maxk
 
 
-def first_lexical(q, n, k):
+def first_lexical(q, n, k=None):
     """ Find the first lexical partition of q having n parts with k as the largest part
     q : the total sum of the partition
     k : size of the largest (and also first) part 
