@@ -25,7 +25,7 @@ def conjugate(partition):
     else:
         l = len(partition)
         conj =  [l] * partition[-1]
-        for i in xrange(l - 1, 0, -1):
+        for i in list(range(l - 1, 0, -1)):
             conj.extend([i] * (partition[i - 1] - partition[i]))
         return conj
 
@@ -210,7 +210,7 @@ def rand_partitions(q, n, sample_size, method='best', D={}, zeros=False):
         if method == 'multiplicity':
             part = multiplicity(part, q1, D, rand_int)
         if method == 'best':
-            if Q < 250 or N >= Q / 1.5:
+            if q1 < 250 or n >= q1 / 1.5:
                 part = bottom_up(part, q1, D, rand_int)
             else:
                 part = divide_and_conquer(part, q1, n, D, rand_int)
@@ -300,8 +300,8 @@ def divide_and_conquer(part, q, n, D, rand_int):
         rand_int : a number representing a member of the feasible set
 
     """
-    if n >= 1 and isinstance(n, int): pass 
-    else: print 'n must be a positive integer'
+    #if n >= 1 and isinstance(n, int): pass 
+    #else: print 'n must be a positive integer'
     
     max_int = int(n)
     min_int = int(1)
@@ -412,6 +412,7 @@ def test_qnk(q, n=False, k=1):
     by default n=q and k=1 """
     if not n: n = q
     
+    '''
     if q >= 0 and isinstance(q, int): pass
     else:
         print q,'q must be a non-negative integer'
@@ -431,6 +432,7 @@ def test_qnk(q, n=False, k=1):
     if q < k and q > 0:
         print 'q must be >= k'
         sys.exit()
+    '''
     
     return
         
