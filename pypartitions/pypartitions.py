@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from __future__ import division
 import sys
 import numpy as np
@@ -102,7 +100,8 @@ def NrParts(*args):
             
             numparts = p[q1-k1+1]
     
-    return numparts;
+    return numparts
+
     
 
 def P(D, q, k):
@@ -168,16 +167,17 @@ def rand_partitions(q, n, sample_size, method='best', D={}, zeros=False):
         fastest method to compute the partition.
     
     """
+    if q < n and zeros == False:
+        zeros = True
+    
     parts = []
     if zeros:
     
-        """ if zeros are allowed, then we must ask whether Q >= N. if not, then
-            the total Q is partitioned among a greater number of parts than there
-            are, say, individuals. In which case, some parts must be zero. A random
-            partition would then be any random partition of Q with zeros appended
-            at the end. But, if Q >= N, then Q is partitioned among less number of
-            parts than there are individuals. In which case, a random partition
-            would be any random partition of Q having N or less parts. """  
+        """ if zeros are allowed, then we must ask whether Q >= N. If not, then
+            the Q is partitioned among a number of parts greater than Q. In which case, 
+            some parts must be zero. A random partition for this case would be any 
+            random partition of Q with N - Q zeros appended. But, if Q >= N, then a 
+            random partition would be any random partition of Q having N or less parts. """
         
         if q >= n:
             # if Q >= N and zero's are allowed, the first part must be equal to or less than N
@@ -203,17 +203,35 @@ def rand_partitions(q, n, sample_size, method='best', D={}, zeros=False):
         
         if method == 'bottom_up':
             part = bottom_up(part, q1, D, rand_int)
+        
         if method == 'top_down':
             part = top_down(part, q1, D, rand_int)
+        
         if method == 'divide_and_conquer':
             part = divide_and_conquer(part, q1, n, D, rand_int)
+        
         if method == 'multiplicity':
             part = multiplicity(part, q1, D, rand_int)
-        if method == 'best':
-            if q1 < 250 or n >= q1 / 1.5:
+        
+        if method == 'best' and zeros == True:
+            if q1 < 350 :
                 part = bottom_up(part, q1, D, rand_int)
-            else:
+            elif n < 0.4 * q1:
                 part = divide_and_conquer(part, q1, n, D, rand_int)
+            else:
+                part = bottom_up(part, q1, D, rand_int)
+                
+        elif method == 'best' and zeros == False:
+            if n < 0.1 * q1:
+                part = multiplicity(part, q1, D, rand_int)
+            elif q < 500:
+                part = bottom_up(part, q1, D, rand_int)    
+            elif q > 500 and n < 0.25*q1:
+                part = divide_and_conquer(part, q1, n, D, rand_int)
+            else:
+                bottom_up(part, q1, D, rand_int)
+                
+                
         if zeros:
             Zs = [0] * (n - len(part))
             part.extend(Zs)
@@ -530,3 +548,49 @@ def next_restricted_part(partition):
                 h2 = list(halves[1])
                 next = list(first_lexical(int(sum(h2)), int(len(h2)), int(h2[0]) - 1))
                 return h1 + next
+
+
+
+
+def get_central_tendency(parts):
+    """ Find the integer partition in a random sample with the greatest average commonness 
+        to all other partitions in the sample. This partition is taken to represent the 
+        central tendency of the set. """
+    
+    if len(parts) > 500:
+        parts = random.sample(parts,500)
+    
+    if len(parts) == 1:
+        return parts[0]
+    
+    xpart = []
+    a1 = 0 # SAD mean
+    v1 = 0 # SAD variance
+    for part in parts:
+        in_common = []
+        ct1 = 0
+        for a in part: # for each rank
+            c = 0
+            for sad in parts: 
+                if a == sad[ct1]:
+                    c += 1
+            try:
+                in_common.append(np.log(c))
+            except:
+                in_common.append(np.sqrt(c))
+            ct1 += 1
+            
+        a2 = np.mean(in_common)
+        v2 = np.var(in_common)  
+        if a2 > a1:
+            a1 = a2
+            v1 = v2
+            xpart = part
+        elif a2 == a1:
+            if v2 < v1:
+                a1 = a2
+                v1 = v2
+                xpart = part
+                
+    #percentile_evar = stats.percentileofscore(sample_evar,obs_evar)
+    return xpart
