@@ -21,7 +21,7 @@ To install the most recent stable version from CRAN use the following R command:
 To install the most updated version directly from github use the following R commands:
 
     library(devtools)
-    install_github('partitions', 'klocey', subdir='rpartitions')
+    install_github('klocey/partitions', subdir = 'rpartitions')
 
 Altneratively the pacakge can be downloaded from github and locally installed using:
 
